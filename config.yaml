@@ -24,6 +24,7 @@ params:
     url: icon.png
     width: 50
   mainSections: post
+  math: true
   nav:
     - icon: fas fa-user fa-lg
       identifier: about
@@ -39,6 +40,16 @@ params:
       identifier: search
       name: Search
       url: /search/
+      weight: 3
+    - icon: fas fa-folder-open fa-lg
+      identifier: categories
+      name: Category
+      url: /categories/
+      weight: 3     
+    - icon: fas fa-archive fa-lg
+      identifier: archives
+      name: Archives
+      url: /archives/
       weight: 3
   social:
     - icon: fab fa-github

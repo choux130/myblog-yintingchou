@@ -1,6 +1,10 @@
 {{ define "main" }}
   <div class="container" role="main">
     <article class="article" class="blog-post">
+      {{ if or .Params.math .Site.Params.math }}
+        {{ partial "math.html" . }}
+      {{ end }}
+      
       {{ partial "toc.html" . }}
 
       {{ if .Params.tags }}
