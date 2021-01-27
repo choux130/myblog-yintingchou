@@ -1,6 +1,6 @@
 baseURL: https://unruffled-morse-99b9b5.netlify.app/
-title: Hugo Themes
-author: Steve Francia
+title: Blog
+author: Yin-Ting Chou
 paginate: 3
 languageCode: en
 DefaultContentLanguage: en
@@ -8,10 +8,10 @@ enableInlineShortcodes: yes
 footnoteReturnLinkContents: ^
 theme: harbor
 Author:
-  name: hugo author
+  name: Yin-Ting Chou
 permalinks:
   page: /:filename/
-  post: /:year/:month/:day/:filename/
+  post: /posts/:filename/
 outputs:
   section:
     - JSON
@@ -41,6 +41,6 @@ params:
       url: /search/
       weight: 3
   social:
-    - icon: fab fa-twitter
-      name: twitter
-      url: https://twitter.com/GoHugoIO
+    - icon: fab fa-github
+      name: github
+      url: https://github.com/choux130
