@@ -1,5 +1,5 @@
 baseURL: https://unruffled-morse-99b9b5.netlify.app/
-title: Blog
+title: My Blog
 author: Yin-Ting Chou
 paginate: 3
 languageCode: en
@@ -31,25 +31,20 @@ params:
       name: About
       url: /about/
       weight: 3
-    - icon: fas fa-tag fa-lg
-      identifier: tags
-      name: Tags
-      url: /tags/
+    - icon: fas fa-folder-open fa-lg
+      identifier: categories
+      name: Category
+      url: /categories/
+      weight: 3
+    - icon: fas fa-archive fa-lg
+      identifier: archives
+      name: Archives
+      url: /archives/
       weight: 3
     - icon: fas fa-search fa-lg
       identifier: search
       name: Search
       url: /search/
-      weight: 3
-    - icon: fas fa-folder-open fa-lg
-      identifier: categories
-      name: Category
-      url: /categories/
-      weight: 3     
-    - icon: fas fa-archive fa-lg
-      identifier: archives
-      name: Archives
-      url: /archives/
       weight: 3
   social:
     - icon: fab fa-github
