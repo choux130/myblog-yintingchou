@@ -1,0 +1,122 @@
+---
+title: Jekyll Website with Github, Github Pages and R Markdown
+author: Yin-Ting
+date: '2017-02-23'
+slug: jekyll-website-with-github-github-pages-and-r-markdown
+aliases: 
+  - /posts/jekyll-website-with-github-github-pages-and-r-markdown
+categories:
+  - Others
+tags: 
+  - Website
+draft: no
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<span style="color: darkred">
+<strong>Update : 2018-05-06</strong> <br />
+Yihui Xie has announced a new package <a href="https://blog.rstudio.com/2017/09/11/announcing-blogdown/">blogdown</a> in September 2017. This package include all the features in <a href="https://github.com/yihui/knitr-jekyll">knitr-jekyll</a> but instead of using Jekyll this time he switched to <a href="https://gohugo.io/">Hugo</a>. There is a terrific instruction from him, <a href="https://bookdown.org/yihui/blogdown/">blogdown: Creating Websites with R Markdown</a>. So, if you want to integrate your website with R Markdown, I will definitely recommend you to check that out. I also convert my whole website from Jekyll with knitr-jekyll to Hugo with blogdown.
+</span>
+<br />
+<hr />
+<p><strong>The Github repository for this website :</strong> <a href="https://github.com/choux130/myblog">choux130/myblog</a>. <br />
+<strong>The Github repository for the website template :</strong> <a href="https://github.com/bencentra/centrarium">bencentra/centrarium</a></p>
+<p>This post is about the process I have benn through for setting up this website, the resources I have read and the things I have tried to do and it just worked out. If you are also new to website setup but has passions for having one, please check out this post and hope you find it helpful to you. Feel free to leave any comments. Let’s discuss and learn together!</p>
+<p>I am a stats person and my programming experience are all about statistical modeling, data manipulating and numerical computing. At first, I did not have any idea about setting up a website. After doing some research online, I found that Wordpress has huge online resources and community. So, my first step was playing around with <a href="https://wordpress.com/start/design-type-with-store">Wordpress online</a>. It is easy to use and has very beautiful interface but for the free trial, you will have limited functions, spaces and domain name related to wordpress.com. Without having a lot budget for setting up a website, I tried to do <a href="https://wordpress.org/download/">Wordpress offline</a>. It is free to download to your computer and you can add many wonderful extensions for free. But you will need to host your website on companies like <a href="https://www.bluehost.com">Bluehost</a>, <a href="http://www.hostgator.com">HostGator</a>,…etc. Generally, the fee will be around 50 ~ 100/year which is still too high to me. Hence, I kept finding until I met <a href="https://jekyllrb.com/">Jekyll</a> which can be hosted on <a href="https://pages.github.com/">Github Pages</a> for free. So, all I need to do is registering a domain name with <a href="https://domains.google">Google Domains</a> for only $ 12/year. Now, I am satisfied for all the things I have now.</p>
+<p><br /></p>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><p><strong><font size="4">Why Jekyll not Wordpress? </font></strong> <br />
+There are 3 main reasons why I chose Jekyll not Wordpress.
+<br />
+<br />
+<strong>Firstly, Wordpress does not work well with R Markdown.</strong> <br />
+I am a big fan to R and I write every analysis report (ex: <a href="https://choux130.github.io/text_for_thesis/final_text.pdf">my master thesis - PDF</a>, <a href="https://github.com/choux130/text_for_thesis">R Sweave code</a>) and slides (ex: <a href="https://choux130.github.io/slide_thesis_ioslides/#1">my master thesis - ioslides</a>, <a href="https://github.com/choux130/slide_thesis_ioslides">R Markdown code</a>) using <a href="https://www.rstudio.com/">RStudio</a> products. So, I wish that all my web posts and pages can be generated from R Markdwon which is crucial to me. Although I found that I can use the <a href="https://yihui.name/knitr/demo/wordpress/">package RWordPress</a> to generate posts on Wordpress, it just did not work really well on transforming formats and syntax. The posts on Wordpress can be really different from the HTML files you compile in R Markdown. On the contrary, by using <a href="https://github.com/yihui/knitr-jekyll">knitr-jekyll</a> in my Jekyll website, the formats and contents of posts are almost exactly the same as what I compile in R Markdown and it always work smoothly when transforming files. So, writing posts in Jekyll is definitely more fun than in Wordpress.
+<br />
+<strong>Secondly, the website structure behind Wordpress is far more complicated than Jekyll.</strong> <br />
+The website structure behind Wordpress includes MySQL, PHP and Apache which are gigantic and may be too technical for me for now. And, because of its complicated structure, whenever errors happen, all I get is just a white page without any error codes on the user screen. It is just so hard for me to debug. On the other hand, a Jekyll website is a directory folder consists of many <code>.html</code>, <code>.scss</code>, <code>.json</code>, <code>.xml</code> files which I can easily open the files, inspect each code line and modify them if you want. And, every error will be shown in the terminal window in details, so I can just Google for solutions. Hence, from my expereince, Jekyll is much more controllable than Wordpress for its simplicity.
+<br />
+<strong>Finally, many prominent data scientist also choose Jekyll for their personal website or for project website.</strong> <br />
+For example, <a href="https://yihui.name">Yihui Xie (the author of knitr-jekyll)</a>, <a href="https://brendanrocks.com">Brenda Rocks</a>, <a href="http://simplystatistics.org">Simply Statistics</a>, <a href="http://topepo.github.io/caret/index.html">The caret Package</a>, <a href="http://r4ds.had.co.nz">R for Data Science</a>…etc.</p></li>
+<li><p><strong><font size="4">Part I : Get started! Combine Jekyll, Github and Github Pages</font></strong> <br /></p>
+<ul>
+<li><p><strong>Basic ideas</strong> <br />
+Before setting up a Jekyll website and hosting it on Github with Github Pages, I think I should have a rough idea about what they are and what they can do. So, the following is the resources that I have browsed.</p>
+<ul>
+<li>Resources for starting
+<ol style="list-style-type: decimal">
+<li><a href="https://guides.github.com">Github Guides</a></li>
+<li><a href="https://pages.github.com">Github Pages</a></li>
+<li><a href="https://jekyllrb.com">Jekyll</a></li>
+</ol></li>
+</ul></li>
+<li><p><strong>Steps for connecting all of them</strong> <br />
+Then, it’s time for us to make those three work together on my own computers. The following are the steps to do it with some helpful resources.</p>
+<ol style="list-style-type: decimal">
+<li><p>Install Jekyll on my computer. <br />
+<a href="http://jekyll.tips/jekyll-casts/install-jekyll-on-os-x/">Jekyll Tips - Install Jekyll on Mac OS X</a></p></li>
+<li><p>Find a desired Jekyll template. <br />
+<a href="http://jekyllthemes.org">Jekyll Theme</a> and <a href="https://startbootstrap.com/template-categories/all/">Start Bootstrap Templates</a></p></li>
+<li><p>Deploy the theme website on Github and Github Desktop. <br />
+<a href="https://www.youtube.com/watch?v=39hnYDC_o9U">How to Deploy a Website Using GitHub Desktop by Deep Datta</a> and <a href="https://www.youtube.com/channel/UCbOO7d0vVo0kIrkd7m32irg">Github Pages and Jekyll Tutorial by WebJeda</a></p></li>
+<li><p>Run Jekyll locally. <br />
+<a href="http://programminghistorian.org/lessons/building-static-sites-with-jekyll-github-pages#section3a">Building a static website with Jekyll and GitHub Pages</a></p>
+<ol style="list-style-type: decimal">
+<li><p>Change your directory to the website directory.
+<code>$ cd /path/for/website/dir</code></p></li>
+<li><p>Install <code>Jekyll bundler</code> using <code>gem</code>.
+<code>$ gem install jekyll bundler</code>
+Install the contents in bundler.
+<code>$ bundle install</code>
+Update the bundler.</p>
+<pre><code>$ bundle update</code></pre></li>
+<li><p>Run the website locally.</p>
+<pre><code>$ bundle exec jekyll serve</code></pre></li>
+</ol></li>
+</ol></li>
+</ul></li>
+<li><p><strong><font size="4">Part II: Change appearances, Add features and R Markdown</font></strong> <br />
+Afer finishing all the deployment, I started to cutomize my website by modifying some <code>.html</code> and <code>.scss</code> files in the template. The text editor I used for all the modifications is <a href="https://atom.io">Atom</a>. The following are the features I added in my website and some relevant resources.</p>
+<ul>
+<li><strong>Appearance</strong>:
+<ol style="list-style-type: decimal">
+<li>Make my own logo and replace the logo form template. <a href="https://logomakr.com">logomakr</a><br />
+</li>
+<li>Change the color of font, background and hover. <a href="https://www.w3schools.com/colors/colors_picker.asp">W3School</a> <br />
+Modify codes in <code>_variables.scss</code> and <code>_typography</code>.</li>
+</ol></li>
+<li><strong>Features</strong>:
+<ol style="list-style-type: decimal">
+<li><p>Use R Makdown to publish posts: <a href="https://github.com/yihui/knitr-jekyll">knitr-jekyll</a>. <br />
+Download all the related files from the Github repo and put them in the website directory folder.</p></li>
+<li><p>Add math syntax by using LaTeX notations in R Markdown: <a href="http://docs.mathjax.org/en/latest/start.html">Mathjax</a>. <br />
+Mathjax is a javascript library, you can import it from online source or from the local directory after downloading it to the website directory folder. What I did here is import it from online source, which means that the features will not be able to show up when internet is not connected.<br />
+Copy the following codes in <code>header.html</code> file.
+<br /></p>
+<pre class="htm"><code> &lt;!-- MathJax --&gt;
+ &lt;script src=&quot;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+ &lt;script type=&quot;text/x-mathjax-config&quot;&gt;
+    MathJax.Hub.Config({
+    tex2jax: {inlineMath: [[&#39;$&#39;,&#39;$&#39;], [&#39;\[&#39;,&#39;\]&#39;]]}
+    });&lt;/script&gt;</code></pre>
+<p><br /></p></li>
+<li><p>Add a page with search bar. <br />
+<a href="http://rayhightower.com/blog/2016/01/04/how-to-make-lunrjs-jekyll-work-together/">How to Make lunr.js and Jekyll Work Together (with Gotchas)</a></p></li>
+<li><p>Add comment feature by using <a href="https://disqus.com">Disqus</a>. <br />
+<a href="https://www.youtube.com/watch?v=etvHFmVCvj8">How to add Disqus comments to Jekyll Blog - Tutorial 9</a></p></li>
+<li><p>Highlight syntax and codes: <a href="https://highlightjs.org">Highlight.js</a> <br />
+Luckily I have this feature in my template, so I do not need to add this again. But if your website template do not have this feature and you want to add it, here is how you may want to do. Copy the following codes into your <code>header.html</code> and change the <code>default.min.css</code> to the style name you want. <a href="https://highlightjs.org/static/demo/">Here are all the styles</a>. Or, you can <a href="https://highlightjs.org/download/">download all the Highlight.js library</a> to your website directory folder and import the library by following <a href="https://highlightjs.org/usage/">How to use highlight.js</a>.</p>
+<pre class="html"><code>&lt;link rel=&quot;stylesheet&quot;  href=&quot;//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css&quot;&gt;
+&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js&quot;&gt;&lt;/script&gt;</code></pre></li>
+</ol></li>
+</ul></li>
+</ul>
+<p><br /></p>
+<ul>
+<li><strong><font size="4">Part III : Connect the Jekyll Github website to your Personal Domain</font></strong> <br />
+My domain name, <code>www.yintingchou.com</code>, is registered on <a href="http://www.curtismlarson.com/blog/2015/04/12/github-pages-google-domains/">Google Domain</a> which costs me $12 only a year. Here is the tutorial post teaching you <a href="http://www.curtismlarson.com/blog/2015/04/12/github-pages-google-domains/">how to point a domain on Google Domains to GitHub pages</a>. I followed this post and everything just works perfectly to me. If your domain provider is <a href="https://www.bluehost.com/">Bluehost</a> rather than Google Domain, check out this post, <a href="http://bryancshepherd.com/Setting-up-Bluehost-DNS-for-a-GitHub-Jekyll-blog/">Setting up Bluehost DNS for a GitHub Jekyll blog</a>.</li>
+</ul>
+</div>

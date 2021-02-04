@@ -1,0 +1,81 @@
+---
+title: R --- Naive Bayes Classifier
+author: Yin-Ting
+date: '2017-02-12'
+slug: r-naive-bayes-classifier
+aliases: 
+  - /posts/r-naive-bayes-classifier/
+categories:
+  - R
+tags:
+  - Classification
+draft: no
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>This post shows the R code for Naive Bayes Classifier by using funtion <code>naiveBayes()</code> in package <code>e1071</code>. And I use the simple example in my post, <a href="/posts/naive-bayes-classifier/">Naive Bayes Classifier</a>, to show how to use this function.</p>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><strong><font size="4">Resources for Package ‘e1071’</font></strong>
+<ul>
+<li><a href="https://cran.r-project.org/web/packages/e1071/index.html">CRAN - Package ‘e1071’</a></li>
+<li><a href="https://cran.r-project.org/web/packages/e1071/e1071.pdf">Package ‘e1071’ - Reference manual</a></li>
+</ul></li>
+</ul>
+<ul>
+<li><p><strong><font size="4"> Example Code (e1071::naiveBayes())</font></strong> <br />
+Suppose we have a contingency table like this:
+<img src="/posts/2017-02-12-r-naive-bayes-classifier/table_nbc_2.png" style="width:700px"/></p>
+<p><strong>Q : </strong> And, what will be our guess on type if we have a data has X1=“Yes” and X2=“Unsure”? <br />
+<strong>A : </strong> Our guess is Type B.</p>
+<pre class="r"><code>#######################
+#### Generate Data ####
+#######################
+X1=c(rep(&quot;yes&quot;,10),rep(&quot;no&quot;,40),rep(&quot;yes&quot;,70),rep(&quot;no&quot;,30))
+X2=c(rep(&quot;yes&quot;,10),rep(&quot;no&quot;,10),rep(&quot;unsure&quot;,30),
+     rep(&quot;yes&quot;,40),rep(&quot;no&quot;,50),rep(&quot;unsure&quot;,10))
+train=data.frame(X1,X2, Type=c(rep(&quot;A&quot;,50),rep(&quot;B&quot;,100)))
+head(train,3)</code></pre>
+<pre><code>##    X1  X2 Type
+## 1 yes yes    A
+## 2 yes yes    A
+## 3 yes yes    A</code></pre>
+<pre class="r"><code>test=data.frame(X1=&quot;yes&quot;,X2=&quot;unsure&quot;)
+head(test)</code></pre>
+<pre><code>##    X1     X2
+## 1 yes unsure</code></pre>
+<pre class="r"><code>################################
+#### Naive Bayes Classifier ####
+################################
+if (!require(&quot;e1071&quot;)) install.packages(&quot;e1071&quot;)
+library(e1071)
+(m=naiveBayes(Type ~ ., data = train))</code></pre>
+<pre><code>## 
+## Naive Bayes Classifier for Discrete Predictors
+## 
+## Call:
+## naiveBayes.default(x = X, y = Y, laplace = laplace)
+## 
+## A-priori probabilities:
+## Y
+##         A         B 
+## 0.3333333 0.6666667 
+## 
+## Conditional probabilities:
+##    X1
+## Y    no yes
+##   A 0.8 0.2
+##   B 0.3 0.7
+## 
+##    X2
+## Y    no unsure yes
+##   A 0.2    0.6 0.2
+##   B 0.5    0.1 0.4</code></pre>
+<pre class="r"><code>(p=predict(m, test))</code></pre>
+<pre><code>## factor(0)
+## Levels:</code></pre></li>
+</ul>
+</div>

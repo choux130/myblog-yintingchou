@@ -1,0 +1,324 @@
+---
+title: 'How Web Scraping eases my job searching pain? - Part II : Scrape contents
+  from a list of URLs'
+author: Yin-Ting
+date: '2017-06-14'
+slug: web-scraping-2
+aliases: 
+  - /posts/web-scraping-2
+categories:
+  - Others
+tags:
+  - Website
+draft: no
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p><span style="color: darkred">
+<strong>Update : 2018-05-06</strong> <br />
+I have found that the website structure of <a href="https://www.indeed.com/">Indeed</a>, <a href="https://www.monster.com/">Monster</a>, <a href="http://www.dice.com/">Dice</a>, <a href="http://www.careerbuilder.com/">Careerbuilder</a> have been changed since I wrote these posts. So, some of my code may not work now. But, I think the concept and the process is still the same.
+</span></p>
+<hr />
+<p><strong>The Github repository for this project :</strong> <a href="https://github.com/choux130/webscraping_example">choux130/webscraping_example</a>.</p>
+<p>From the previous post, <a href="/posts/web-scraping-1/">How Web Scraping eases my job searching pain? - Part I : Scrape contents from one URL</a>, we know how to summarize all the job searching results from <a href="http://www.careerbuilder.com/">Careerbuilder</a> into a <code>.csv</code> file with the following features:</p>
+<ul>
+<li>From which Job Searching Website</li>
+<li>Job ID (related to Job Link)</li>
+<li>Job Title</li>
+<li>Job Company</li>
+<li>Location</li>
+<li>Job Link</li>
+</ul>
+<p><a href="/posts/2017-06-14-web-scraping-2/web_jobs2.png">
+<img src="/posts/2017-06-14-web-scraping-2/web_jobs2.png" style="width:100%"/></a></p>
+<p>And, to abtain more details more each job, in this post we are going to add few more features by scraping every <em>Job Link</em>. Hence, for each Job, we will also know their</p>
+<ul>
+<li>Job Type</li>
+<li>Required Skills</li>
+<li>Required Education Level</li>
+<li>Preferred Majors</li>
+<li>Interesting Keywords</li>
+<li>All the Text in the Page</li>
+</ul>
+<p><br />
+<a href="/posts/2017-06-14-web-scraping-2/web_jobs3.png">
+<img src="/posts/2017-06-14-web-scraping-2/web_jobs3.png" style="width:100%"/></a>
+<br /></p>
+<p>Here is a rough idea about how what we are going to do. First, we have to define what are the <em>Job Type</em>, <em>Required Skills</em>, <em>Required Education Level</em>, <em>Preferred Majors</em> and <em>Interesting Keywords</em>. These can be based on observations on many job description or personal interest. Then, use code to find out whether the defined terms are included in the job pages. If it is in the pages, pick it up and record it in the <code>.csv</code> file.</p>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><strong><font size="4">References</font></strong> <br />
+Thank you all so much!
+<ul>
+<li><a href="https://jessesw.com/Data-Science-Skills/">Jesse Steinweg-Woods, Ph.D. - Web Scraping Indeed for Key Data Science Job Skills</a></li>
+<li><a href="https://docs.python.org/2/library/re.html">7.2. re — Regular expression operations</a></li>
+</ul></li>
+<li><strong><font size="4">Steps</font></strong> <br />
+<ol style="list-style-type: decimal">
+<li><p>Read the <code>.csv</code> file saved from <a href="/posts/web-scraping-1/">Part I</a> and do some preparations.</p>
+<pre class="python"><code>########################################################
+#################### IMPORT LIBRARY ####################
+########################################################
+# import bs4
+# import numpy
+# import pandas
+# import re
+# import requests
+# import datetime
+# import stop_words
+
+# read the csv file
+# path = &#39;/path/output/&#39; + &#39;job_careerbuilder_&#39; + now_str_name + &#39;.csv&#39;
+job_df_careerbuilder = pandas.DataFrame.from_csv(path)
+
+# define the stop_words for future use
+stop_words = stop_words.get_stop_words(&#39;english&#39;) # list out all the English stop word
+# print(stop_words)</code></pre></li>
+<li><p>Define what are <i>Job Type</i>, <i>Required Skills</i>, <i>Required Education Level</i>, <i>Preferred Majors</i>, <i>Interesting Keywords</i> and <i>All the Text in the Page</i>.</p>
+<ul>
+<li><p><i>Job Type</i> <br />
+<span>The first <code>type_lower</code> are the exact wording showing in the pages (when searching all the words will be in lower cases). It will be mapped to the updated <code>type</code> by using dictionary, and then be shown in the cell of the <code>.csv</code> file. The purpose for the mapping is mainly for wording consistency which is important to my future text analysis project, the similarity between all jobs using <a href="https://janav.wordpress.com/2013/10/27/tf-idf-and-cosine-similarity/">Term Frequency and Inverse Document Frequency (TF - IDF)</a>. </span></p>
+<pre><code>```python
+####################################################
+##### DEFINE THE TERMS THAT I AM INTERESTED IN #####
+####################################################
+
+##### Job types #####
+type = [&#39;Full-Time&#39;, &#39;Full Time&#39;, &#39;Part-Time&#39;, &#39;Part Time&#39;, &#39;Contract&#39;, &#39;Contractor&#39;]
+type_lower = [s.lower() for s in type] # lowercases, the exact wording
+
+# map the type_lower to type
+type_map = pandas.DataFrame({&#39;raw&#39;:type, &#39;lower&#39;:type_lower}) # create a dataframe
+type_map[&#39;raw&#39;] = [&quot;Full-Time&quot;, &quot;Full-Time&quot;, &#39;Part-Time&#39;, &#39;Part-Time&#39;, &quot;Contract&quot;, &#39;Contract&#39;] # modify the mapping
+type_dic = list(type_map.set_index(&#39;lower&#39;).to_dict().values()).pop() # use the dataframe to create a dictionary
+#print(type_dic)
+```
+
+&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;{&#39;full-time&#39;: &#39;Full-Time&#39;, &#39;full time&#39;: &#39;Full-Time&#39;,
+&#39;part-time&#39;: &#39;Part-Time&#39;, &#39;part time&#39;: &#39;Part-Time&#39;,
+&#39;contract&#39;: &#39;Contract&#39;, &#39;contractor&#39;: &#39;Contract&#39;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;</code></pre></li>
+<li><p><i>Required Skills</i> <br />
+<span>It is also referred to <a href= "https://jessesw.com/Data-Science-Skills/">Web Scraping Indeed for Key Data Science Job Skills</a>.</span></p>
+<pre class="python"><code>##### Skills #####
+skills = [&#39;R&#39;, &#39;Shiny&#39;, &#39;RStudio&#39;, &#39;Markdown&#39;, &#39;Latex&#39;, &#39;SparkR&#39;, &#39;D3&#39;, &#39;D3.js&#39;,
+    &#39;Unix&#39;, &#39;Linux&#39;, &#39;MySQL&#39;, &#39;Microsoft SQL server&#39;, &#39;SQL&#39;,
+    &#39;Python&#39;, &#39;SPSS&#39;, &#39;SAS&#39;, &#39;C++&#39;, &#39;C&#39;, &#39;C#&#39;,&#39;Matlab&#39;,&#39;Java&#39;,
+    &#39;JavaScript&#39;, &#39;HTML&#39;, &#39;HTML5&#39;, &#39;CSS&#39;, &#39;CSS3&#39;,&#39;PHP&#39;, &#39;Excel&#39;, &#39;Tableau&#39;,
+    &#39;AWS&#39;, &#39;Amazon Web Services &#39;,&#39;Google Cloud Platform&#39;, &#39;GCP&#39;,
+    &#39;Microsoft Azure&#39;, &#39;Azure&#39;, &#39;Hadoop&#39;, &#39;Pig&#39;, &#39;Spark&#39;, &#39;ZooKeeper&#39;,
+    &#39;MapReduce&#39;, &#39;Map Reduce&#39;,&#39;Shark&#39;, &#39;Hive&#39;,&#39;Oozie&#39;, &#39;Flume&#39;, &#39;HBase&#39;, &#39;Cassandra&#39;,
+    &#39;NoSQL&#39;, &#39;MongoDB&#39;, &#39;GIS&#39;, &#39;Haskell&#39;, &#39;Scala&#39;, &#39;Ruby&#39;,&#39;Perl&#39;,
+    &#39;Mahout&#39;, &#39;Stata&#39;]
+skills_lower = [s.lower() for s in skills]# lowercases
+skills_map = pandas.DataFrame({&#39;raw&#39;:skills, &#39;lower&#39;:skills_lower})# create a dataframe
+skills_map[&#39;raw&#39;] = [&#39;R&#39;, &#39;Shiny&#39;, &#39;RStudio&#39;, &#39;Markdown&#39;, &#39;Latex&#39;, &#39;SparkR&#39;, &#39;D3&#39;, &#39;D3&#39;,
+    &#39;Unix&#39;, &#39;Linux&#39;, &#39;MySQL&#39;, &#39;Microsoft SQL server&#39;, &#39;SQL&#39;,
+    &#39;Python&#39;, &#39;SPSS&#39;, &#39;SAS&#39;, &#39;C++&#39;, &#39;C&#39;, &#39;C#&#39;,&#39;Matlab&#39;,&#39;Java&#39;,
+    &#39;JavaScript&#39;, &#39;HTML&#39;, &#39;HTML&#39;, &#39;CSS&#39;, &#39;CSS&#39;,&#39;PHP&#39;, &#39;Excel&#39;, &#39;Tableau&#39;,
+    &#39;AWS&#39;, &#39;AWS&#39;,&#39;GCP&#39;, &#39;GCP&#39;,
+    &#39;Azure&#39;, &#39;Azure&#39;, &#39;Hadoop&#39;, &#39;Pig&#39;, &#39;Spark&#39;, &#39;ZooKeeper&#39;,
+    &#39;MapReduce&#39;, &#39;MapReduce&#39;,&#39;Shark&#39;, &#39;Hive&#39;,&#39;Oozie&#39;, &#39;Flume&#39;, &#39;HBase&#39;, &#39;Cassandra&#39;,
+    &#39;NoSQL&#39;, &#39;MongoDB&#39;, &#39;GIS&#39;, &#39;Haskell&#39;, &#39;Scala&#39;, &#39;Ruby&#39;,&#39;Perl&#39;,
+    &#39;Mahout&#39;, &#39;Stata&#39;]
+skills_dic = list(skills_map.set_index(&#39;lower&#39;).to_dict().values()).pop()# use the dataframe to create a dictionary
+# print(skills_dic)</code></pre></li>
+<li><p><i>Required Education Level</i> <br /></p>
+<pre class="python"><code>##### Education #####
+edu = [&#39;Bachelor&#39;, &quot;Bachelor&#39;s&quot;, &#39;BS&#39;, &#39;B.S&#39;, &#39;B.S.&#39;, &#39;Master&#39;, &quot;Master&#39;s&quot;, &#39;Masters&#39;, &#39;M.S.&#39;, &#39;M.S&#39;, &#39;MS&#39;,
+        &#39;PhD&#39;, &#39;Ph.D.&#39;, &quot;PhD&#39;s&quot;, &#39;MBA&#39;]
+edu_lower = [s.lower() for s in edu]# lowercases
+edu_map = pandas.DataFrame({&#39;raw&#39;:edu, &#39;lower&#39;:edu_lower})# create a dataframe
+edu_map[&#39;raw&#39;] = [&#39;BS&#39;, &quot;BS&quot;, &#39;BS&#39;, &quot;BS&quot;, &#39;BS&#39;, &#39;MS&#39;, &quot;MS&quot;, &#39;MS&#39;, &#39;MS&#39;, &#39;MS&#39;, &#39;MS&#39;,
+        &#39;PhD&#39;, &#39;PhD&#39;, &quot;PhD&quot;, &#39;MBA&#39;] # modify the mapping
+edu_dic = list(edu_map.set_index(&#39;lower&#39;).to_dict().values()).pop()# use the dataframe to create a dictionary
+# print(edu_dic)</code></pre></li>
+<li><p><i>Preferred Majors</i> <br /></p>
+<pre class="python"><code>##### Major #####
+major = [&#39;Computer Science&#39;, &#39;Statistics&#39;, &#39;Mathematics&#39;, &#39;Math&#39;,&#39;Physics&#39;,
+    &#39;Machine Learning&#39;,&#39;Economics&#39;,&#39;Software Engineering&#39;, &#39;Engineering&#39;,
+    &#39;Information System&#39;, &#39;Quantitative Finance&#39;, &#39;Artificial Intelligence&#39;,
+    &#39;Biostatistics&#39;, &#39;Bioinformatics&#39;, &#39;Quantitative&#39;]
+major_lower = [s.lower() for s in major]# lowercases
+major_map = pandas.DataFrame({&#39;raw&#39;:major, &#39;lower&#39;:major_lower})# create a dataframe
+major_map[&#39;raw&#39;] = [&#39;Computer Science&#39;, &#39;Statistics&#39;, &#39;Math&#39;, &#39;Math&#39;,&#39;Physics&#39;,
+    &#39;Machine Learning&#39;,&#39;Economics&#39;,&#39;Software Engineering&#39;, &#39;Engineering&#39;,
+    &#39;Information System&#39;, &#39;Quantitative Finance&#39;, &#39;Artificial Intelligence&#39;,
+    &#39;Biostatistics&#39;, &#39;Bioinformatics&#39;, &#39;Quantitative&#39;]# modify the mapping
+major_dic = list(major_map.set_index(&#39;lower&#39;).to_dict().values()).pop()# use the dataframe to create a dictionary
+# print(major_dic)</code></pre></li>
+<li><p><i>Interesting Keywords</i> <br /></p>
+<pre class="python"><code>##### Key Words ######
+keywords = [&#39;Web Analytics&#39;, &#39;Regression&#39;, &#39;Classification&#39;, &#39;User Experience&#39;, &#39;Big Data&#39;,
+    &#39;Streaming Data&#39;, &#39;Real-Time&#39;, &#39;Real Time&#39;, &#39;Time Series&#39;]
+keywords_lower = [s.lower() for s in keywords]# lowercases
+keywords_map = pandas.DataFrame({&#39;raw&#39;:keywords, &#39;lower&#39;:keywords_lower})# create a dataframe
+keywords_map[&#39;raw&#39;] = [&#39;Web Analytics&#39;, &#39;Regression&#39;, &#39;Classification&#39;, &#39;User Experience&#39;, &#39;Big Data&#39;,
+    &#39;Streaming Data&#39;, &#39;Real Time&#39;, &#39;Real Time&#39;, &#39;Time Series&#39;]# modify the mapping
+keywords_dic = list(keywords_map.set_index(&#39;lower&#39;).to_dict().values()).pop()# use the dataframe to create a dictionary
+# print(keywords_dic)</code></pre></li>
+</ul></li>
+<li><p>Use For Loop to scrape all the URLs and then pick out the interested terms if they are in the page texts. <br /></p>
+<ul>
+<li><p><span>Creat empty lists for storing features of <b>all</b> the jobs. </span></p>
+<pre class="python"><code>##############################################
+##### FOR LOOP FOR SCRAPING EACH JOB URL #####
+##############################################
+# empty list to store details for all the jobs
+list_type = []
+list_skill = []
+list_text = []
+list_edu = []
+list_major = []
+list_keywords = []</code></pre></li>
+<li><p><span>For each loop, create empty lists for storing features of the <span class="math inline">\(i^{th}\)</span> job.</span></p>
+<pre class="python"><code>for i in range(len(job_df_careerbuilder)):
+    # empty list to store details for each job
+    required_type= []
+    required_skills = []
+    required_edu = []
+    required_major = []
+    required_keywords = []</code></pre></li>
+<li><p><span>Extract the all the meaningful texts from the URL. <br />
+The reason for the <code>try:</code> and <code>except:</code> in the for loop is to avoid termination from the forbidden pages.</span></p>
+<pre class="python"><code>    try:
+        # get the HTML code from the URL
+        job_page = requests.get(job_df_careerbuilder.iloc[i, 5])
+        # Choose &quot;lxml&quot; as parser
+        soup = bs4.BeautifulSoup(job_page.text, &quot;lxml&quot;)
+
+        # drop the chunks of &#39;script&#39;,&#39;style&#39;,&#39;head&#39;,&#39;title&#39;,&#39;[document]&#39;
+        for elem in soup.findAll([&#39;script&#39;,&#39;style&#39;,&#39;head&#39;,&#39;title&#39;,&#39;[document]&#39;]):
+            elem.extract()
+        # get the lowercases of the texts
+        texts = soup.getText(separator=&#39; &#39;).lower()</code></pre></li>
+<li><p><span>Clean the texts data.</span></p>
+<pre class="python"><code>        # cleaning the text data
+        string = re.sub(r&#39;[\n\r\t]&#39;, &#39; &#39;, texts) # remove &quot;\n&quot;, &quot;\r&quot;, &quot;\t&quot;
+        string = re.sub(r&#39;\,&#39;, &#39; &#39;, string) # remove &quot;,&quot;
+        string = re.sub(&#39;/&#39;, &#39; &#39;, string) # remove &quot;/&quot;
+        string = re.sub(r&#39;\(&#39;, &#39; &#39;, string) # remove &quot;(&quot;
+        string = re.sub(r&#39;\)&#39;, &#39; &#39;, string) # remove &quot;)&quot;
+        string = re.sub(&#39; +&#39;,&#39; &#39;,string) # remove more than one space
+        string = re.sub(r&#39;r\s&amp;\sd&#39;, &#39; &#39;, string) # avoid picking &#39;r &amp; d&#39;
+        string = re.sub(r&#39;r&amp;d&#39;, &#39; &#39;, string) # avoid picking &#39;r&amp;d&#39;
+        string = re.sub(&#39;\.\s+&#39;, &#39; &#39;, string) # remove &quot;.&quot; at the end of sentences</code></pre></li>
+<li><p><span>For each feature, pick out all the interested terms and then save them in a list.</span></p>
+<pre class="python"><code>        ##### Job types #####
+        for typ in type_lower :
+            if any(x in typ for x in [&#39;+&#39;, &#39;#&#39;, &#39;.&#39;]):
+                # make it possible to find out &#39;c++&#39;, &#39;c#&#39;, &#39;d3.js&#39; without errors
+                typp = re.escape(typ)
+            else:
+                typp = typ
+            # search the string in a string
+            result = re.search(r&#39;(?:^|(?&lt;=\s))&#39; + typp + r&#39;(?=\s|$)&#39;, string)
+            if result:
+                required_type.append(type_dic[typ])
+        list_type.append(required_type)
+
+        ##### Skills #####
+        for sk in skills_lower :
+            if any(x in sk for x in [&#39;+&#39;, &#39;#&#39;, &#39;.&#39;]):
+                skk = re.escape(sk)
+            else:
+                skk = sk
+            result = re.search(r&#39;(?:^|(?&lt;=\s))&#39; + skk + r&#39;(?=\s|$)&#39;,string)
+            if result:
+                required_skills.append(skills_dic[sk])
+        list_skill.append(required_skills)
+
+        ##### Education #####
+        for ed in edu_lower :
+            if any(x in ed for x in [&#39;+&#39;, &#39;#&#39;, &#39;.&#39;]):
+                edd = re.escape(ed)
+            else:
+                edd = ed
+            result = re.search(r&#39;(?:^|(?&lt;=\s))&#39; + edd + r&#39;(?=\s|$)&#39;, string)
+            if result:
+                required_edu.append(edu_dic[ed])
+        list_edu.append(required_edu)
+
+        ##### Major #####
+        for maj in major_lower :
+            if any(x in maj for x in [&#39;+&#39;, &#39;#&#39;, &#39;.&#39;]):
+                majj = re.escape(maj)
+            else:
+                majj = maj
+            result = re.search(r&#39;(?:^|(?&lt;=\s))&#39; + majj + r&#39;(?=\s|$)&#39;, string)
+            if result:
+                required_major.append(major_dic[maj])
+        list_major.append(required_major)
+
+        ##### Key Words #####
+        for key in keywords_lower :
+            if any(x in key for x in [&#39;+&#39;, &#39;#&#39;, &#39;.&#39;]):
+                keyy = re.escape(key)
+            else:
+                keyy = key
+            result = re.search(r&#39;(?:^|(?&lt;=\s))&#39; + keyy + r&#39;(?=\s|$)&#39;, string)
+            if result:
+                required_keywords.append(keywords_dic[key])
+        list_keywords.append(required_keywords)
+
+        ##### All text #####
+        words = string.split(&#39; &#39;) # transform to a list
+        job_text = set(words) - set(stop_words) # drop stop words
+        list_text.append(list(job_text))
+
+    except: # to avoid Forbidden webpages
+        list_type.append(&#39;Forbidden&#39;)
+        list_skill.append(&#39;Forbidden&#39;)
+        list_edu.append(&#39;Forbidden&#39;)
+        list_major.append(&#39;Forbidden&#39;)
+        list_keywords.append(&#39;Forbidden&#39;)
+        list_text.append(&#39;Forbidden&#39;)
+    #print(i) # for tracking purpose</code></pre></li>
+<li><p><span>Add all features to the original datafame and update the <code>.csv</code> files.</span></p>
+<pre><code>```python
+# Add new columns
+job_df_careerbuilder[&#39;job_type&#39;] = list_type
+job_df_careerbuilder[&#39;job_skills&#39;] = list_skill
+job_df_careerbuilder[&#39;job_edu&#39;] = list_edu
+job_df_careerbuilder[&#39;job_major&#39;] = list_major
+job_df_careerbuilder[&#39;job_keywords&#39;] = list_keywords
+job_df_careerbuilder[&#39;job_text&#39;] = list_text
+
+# reorder the columns
+cols=[&#39;from&#39;,&#39;date&#39;,&#39;job_id&#39;,&#39;job_title&#39;,&#39;job_company&#39;,&#39;job_location&#39;,&#39;job_link&#39;,&#39;job_type&#39;,
+&#39;job_skills&#39;, &#39;job_edu&#39;, &#39;job_major&#39;, &#39;job_keywords&#39;,&#39;job_text&#39;]
+job_df_careerbuilder = job_df_careerbuilder[cols]
+
+# print the dimenstion of the dataframe
+print(job_df_careerbuilder.shape)
+
+# save the dataframe as a csv file
+# path = &#39;/path/output/&#39; + &#39;job_careerbuilder_&#39; + now_str_name + &#39;.csv&#39;
+job_df_careerbuilder.to_csv(path)
+```
+&lt;span&gt;`(26, 13)`&lt;/span&gt;</code></pre>
+<p><br /><br />
+<a href="/posts/2017-06-14-web-scraping-2/web_jobs3.png">
+<img src="/posts/2017-06-14-web-scraping-2/web_jobs3.png" style="width:100%"/></a><br /></p></li>
+</ul></li>
+</ol></li>
+<li><strong><font size="4">Difficulties!</font></strong> <br />
+Let me know if you have better ideas about how to solve the following problems.
+<ol style="list-style-type: decimal">
+<li><strong>Not easy to get the exact text data I want.</strong> <br />
+<span>My desired text data for each job page is only the job description part. However, it is hard to use simple code to separate them from other chunks nicely. Because of this, my code may pick some terms which are not shown in the job description part and then lower my data quality.</li>
+<li><strong>Different people say different terms.</strong> <br />
+<span>For example, in our case if we click on the link of the following jobs, we will found that the “<em>CSS</em>” is just the abbreviation of the company’s name and “<em>GCP</em>” seems not to mean “<em>Google Cloud Platform</em>” at all. If this situation happens a lot, my data quality will be lowered again..</span>
+<a href="/posts/2017-06-14-web-scraping-2/trouble.png">
+<img src="/posts/2017-06-14-web-scraping-2/trouble.png" style="width:100%"/></a>
+<a href="/posts/2017-06-14-web-scraping-2/trouble_2.png">
+<img src="/posts/2017-06-14-web-scraping-2/trouble_2.png" style="width:100%"/></a></li>
+</ol></li>
+<li><strong><font size="4">Part II is done, but the code can be more efficient and neat! Part III is on the way! </font></strong> <br />
+Now, we know how to generate an informative <code>.csv</code> file for the searching results from <a href="http://www.careerbuilder.com/">Careerbuilder</a>. Then, we can just do the same things on <a href="https://www.indeed.com/">Indeed</a>, <a href="https://www.monster.com/">Monster</a> and <a href="http://www.dice.com/">Dice</a>. Check out my <a href="https://github.com/choux130/webscraping_example">Github repo - webscraping_example</a> for the example code.
+<br />
+If you follow my example code for the above four job searching websites, you will find that the code is repetitive, the <code>.csv</code> files are seperated and it is time consuming when we have a lot of searching results. So, I am trying to create modules and packages, combine all the seperated <code>.csv</code> files, and then use parallel computing module, <code>multiprocessing</code>, to speed up the running time. All the details will be in my next post, <a href="/posts/web-scraping-3/">How Web Scraping eases my job searching pain? - Part III : Make it More Efficient</a>.</li>
+</ul>
+</div>

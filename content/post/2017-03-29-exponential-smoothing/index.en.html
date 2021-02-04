@@ -1,0 +1,253 @@
+---
+title: Exponential Smoothing
+author: Yin-Ting
+date: '2017-03-29'
+slug: exponential-smoothing
+aliases: 
+  - /posts/exponential-smoothing
+categories:
+  - Methodology
+tags:
+  - Time Series Analysis
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>This post is about Exponential Smoothing method, a prediction method for time series data. There are many forms of Exponential Smoothing method and the most basic ones are Single, Double and Triple (Holt-Winters) Exponential Smoothing. Some of the Exponential Smoothing forms can be written as ARIMA model; some of them can not and vice versa. Compared to ARIMA model, Exponential Smoothing method do not have strong model assumptions and it also can not add explanatory variables in the algorithm. However, it is because of its loose model restrictions, Exponential Smoothing can be calculated really fast which is good when you need to predict the value of the next really small period of time like next minute or next five minutes (the time is so short for you to fit a complete ARIMA model). hod.</p>
+<p>This post is my note about learning Exponential Smoothing. All the contents in this post are based on my reading on many resources which are listed in the References part.</p>
+<div id="references" class="section level3">
+<h3>References</h3>
+<ul>
+<li><strong>Paper</strong>
+<ol style="list-style-type: decimal">
+<li>Winters, Peter R. “Forecasting sales by exponentially weighted moving averages.” Management Science 6, no. 3 (1960): 324-342.</li>
+<li>Gardner, E. S. “Smoothing methods for short-term planning and control.” The handbook of forecasting–a manager’s guide (1987): 174-175.</li>
+<li>Taylor, James W. “Short-term electricity demand forecasting using double seasonal exponential smoothing.” Journal of the Operational Research Society 54, no. 8 (2003): 799-805.</li>
+<li>Taylor, James W. “An evaluation of methods for very short-term load forecasting using minute-by-minute British data.” International Journal of Forecasting 24, no. 4 (2008): 645-658.</li>
+<li>Dimitrov, Preslav Encontros Científicos. “Long-run forecasting of the number of the ecotourism arrivals in the municipality of Stambolovo, Bulgaria.” Tourism &amp; Management Studies, (2013), Issue 1, pp.41-47</li>
+</ol></li>
+<li><strong>Book</strong>
+<ol style="list-style-type: decimal">
+<li><a href="http://www.springer.com/gp/book/9783540719168">Forecasting with Exponential Smoothing: The State Space Approach (2008)</a></li>
+<li><a href="https://www.otexts.org/fpp/7">Forecasting: principles and practice (2013)</a></li>
+</ol></li>
+<li><strong>Online Materials</strong>
+<ol style="list-style-type: decimal">
+<li><a href="https://www.analyticsvidhya.com/blog/2015/12/complete-tutorial-time-series-modeling/">A Complete Tutorial on Time Series Modeling in R - from blog Analytic Vidhya</a></li>
+<li><a href="http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc43.htm">Engineering Statistics Handbook - Chapter 6.4.3</a></li>
+<li><a href="http://robjhyndman.com/hyndsight/">Hyndsight - A blog by Rob J Hyndman</a></li>
+</ol></li>
+</ul>
+</div>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><p><strong><font size="4">Notations</font></strong> <br />
+Define</p>
+<p><span class="math display">\[
+\begin{align}
+y_t &amp;: \text{the observed data in time }t \\[5pt]
+\hat{y_t} &amp;: \text{the predicted data in time }t \\[5pt]
+h &amp;: \text{Number of periods for forecasting}
+\end{align}
+\]</span></p></li>
+<li><p><strong><font size="4">Stationary Data</font></strong> <br />
+The following graph and explanations can be found in the post, <a href="https://www.analyticsvidhya.com/blog/2015/12/complete-tutorial-time-series-modeling/">A Complete Tutorial on Time Series Modeling in R</a> which is from the blog, <a href="https://www.analyticsvidhya.com">Analytics Vidhya</a>. <br /> <br /></p>
+<ol style="list-style-type: decimal">
+<li><strong>The mean of the series data should be constant and can not be explained by time</strong> <br />
+<img src="/posts/2017-03-29-exponential-smoothing/stationary_1.png" style="width:400px" class="center"/></li>
+<li><strong>The variance of the series data should be constant and can not be explained by time</strong> <br />
+<img src="/posts/2017-03-29-exponential-smoothing/stationary_2.png" style="width:400px" class="center"/></li>
+<li><strong>The covariance of the series data should be constant and can not be explained by time</strong> <br />
+<img src="/posts/2017-03-29-exponential-smoothing/stationary_3.png" style="width:400px" class="center"/></li>
+</ol></li>
+<li><p><strong><font size="4">Single Exponential Smoothing</font></strong></p>
+<ul>
+<li><strong>Data Assumptions:</strong> <br />
+<span class="math display">\[\{y_t,\; t=1,2,...\}\]</span> is a stationary time series which has properties that <span class="math inline">\(P(Y_{t_1})=P(Y_{t_2}),\; \forall t_1,\,t_2=1,2,...\)</span> and then <span class="math inline">\(E(Y_{t_1})=E(Y_{t_2}),\; \forall t_1,\,t_2=1,2,...\)</span>.</li>
+</ul>
+<pre class="r"><code>if(!require(&quot;forecast&quot;)) install.packages(&quot;forecast&quot;)
+library(forecast)
+mean = 100
+set.seed(123)
+res = rnorm(n = 240, mean = 0, sd = 5)
+myvector = mean + res
+dat = ts(myvector, start=c(2017, 1), frequency=12)
+fit = HoltWinters(dat, beta=FALSE, gamma=FALSE)
+fit_h = forecast(fit, h=10)
+par(mfrow = c(1, 2))
+plot(stl(dat, s.window=12), main=&quot;Single Exponential Smoothing&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code>par(mfrow=c(2,2))
+plot(fit)
+plot(fit_h)
+acf(fit_h$residuals, na.action = na.omit)
+pacf(fit_h$residuals, na.action = na.omit)</code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-1-2.png" width="672" /></p>
+<ul>
+<li><p><strong>Algorithm:</strong> <br />
+The original algorithm which was defined by Winters (1960),</p>
+<p><span class="math display">\[
+\begin{align}
+\hat{y_{t}} &amp;= \alpha y_t + (1-\alpha)\hat{y_{t-1}} \:,
+\quad 0&lt; \alpha \leq 1 \\
+\end{align}
+\]</span></p>
+<p>The alternative algorithm which has the same property as the original one but makes more sense on explanation,</p>
+<p><span class="math display">\[
+\begin{align}
+\hat{y_{t}} &amp;= \alpha y_{t-1}+ (1-\alpha)\hat{y_{t-1}} \:,
+\quad 0&lt; \alpha \leq 1 \\[5pt]
+\hat{y_{t+h}} &amp;= \hat{y_{t+1}} \\[5pt]
+        &amp;= \alpha y_{t}+ (1-\alpha)\hat{y_{t}}
+\end{align}
+\]</span></p>
+<ul>
+<li><p><strong>Initial values:</strong> <br />
+To initiate the single exponential smoothing, we should give a initial value, <span class="math inline">\(\hat{y_0}\)</span>. There are many methods to choose the initial value, like <span class="math inline">\(\hat{y_0}=y_0\)</span> or the mean value of the first <span class="math inline">\(n\)</span> time points, <span class="math inline">\(\hat{y_0}=\frac{1}{n}\sum_{i=1}^{n}y_i\)</span>.</p></li>
+<li><p><strong>Parameters:</strong><br />
+<span class="math display">\[{\alpha}\]</span> <br />
+The common method for calculating <span class="math inline">\(\alpha\)</span> is finding the estimates which can minimizing Sum of the Square of Errors (SSE), <span class="math inline">\(\sum_{i=1}^{n}(y_i-\hat{y_i})^2\)</span>, or Mean Square of Errors (MSE), <span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y_i})^2\)</span>.</p></li>
+<li><p><strong>Derivation:</strong> <br />
+The derivation of the original algorithm can be found in <a href="#ref">Winters (1960)</a>. The following is the proof for the alternative one based on Winters’s derivation ideas. Here, we can suppose <span class="math inline">\(y_t\)</span> are random variables.</p></li>
+</ul>
+<p><span class="math display">\[
+\begin{align}
+\hat{y_1}  &amp;= \alpha y_0 + (1-\alpha) \hat{y_0} \\[5pt]
+\hat{y_2}  &amp;= \alpha y_1 + (1-\alpha) \hat{y_1} \\[5pt]
+&amp;= \alpha y_1 + (1-\alpha)(\alpha y_0 + (1-\alpha) \hat{y_0}) \\[5pt]
+&amp;= \alpha y_1 + \alpha(1-\alpha)y_0 + (1-\alpha)^2 \hat{y_0} \\[5pt]
+&amp;\quad \quad \quad \vdots \\[5pt]
+\hat{y_t}  &amp;= \alpha y_{t-1} + \alpha (1-\alpha)y_{t-2} +
+          \alpha (1-\alpha)^2 y_{t-3} +\dots + \\[5pt]
+&amp;\qquad \alpha (1-\alpha)^{t-2}y_1 + \alpha(1-\alpha)^{t-1}y_0 +
+          (1-\alpha)^t\hat{y_0} \\[5pt]
+&amp;= \alpha\sum_{i=1}^{t} (1-\alpha)^{i-1}y_{t-i} +
+          (1-\alpha)^t\hat{y_0} \\[10pt]
+\text{Then} \quad E(\hat{y_t}) &amp;= \alpha\sum_{i=1}^{t}
+  (1-\alpha)^{i-1}E(y_{t-i}) + (1-\alpha)^tE(\hat{y_0}) \\[5pt]
+\text{(when $t$ is large, $(1-\alpha)^t$ }&amp;\text{will approach to $0$ and $\alpha\sum_{i=1}^{t} (1-\alpha)^{i-1}$ will approach to $1$.)} \\[5pt]
+&amp;\simeq E(y_{t-i}) = E(y_t) \text{ (which meets the assumption of stationary process.)}
+\end{align}
+\]</span></p></li>
+</ul></li>
+</ul>
+<p><br /></p>
+<ul>
+<li><p><strong><font size="4">Double Exponential Smoothing</font></strong></p>
+<ul>
+<li><strong>Data Assumptions:</strong> <br />
+Unlike the data assumption of Single Exponential Smoothing, Double Exponential Smoothing allows data has trend feature. That is, data points has stationary process on a line with trend.</li>
+</ul>
+<pre class="r"><code>mean = 100
+set.seed(123)
+res = rnorm(n = 240, mean = 0, sd = 5)
+trend = 0.2*c(1:240)+5
+myvector = mean + res + trend
+dat = ts(myvector, start = c(2017, 1), frequency = 12)
+fit = HoltWinters(dat, gamma = FALSE)
+fit_h = forecast(fit, h=10)
+par(mfrow = c(1, 2))
+plot(stl(dat, s.window=12), main=&quot;Double Exponential Smoothing&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>par(mfrow = c(2,2))
+plot(fit)
+plot(fit_h)
+acf(fit_h$residuals, na.action = na.omit)
+pacf(fit_h$residuals, na.action = na.omit)</code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<ul>
+<li><p><strong>Algorithm:</strong></p>
+<p><span class="math display">\[
+\begin{align}
+\text{level:}&amp; &amp;&amp;l_{t} = \alpha y_{t} + (1-\alpha) (l_{t-1}+b_{t-1}) \\[5pt]
+\text{trend:}&amp; &amp;&amp;b_{t} = \beta (l_t-l_{t-1}) + (1-\beta) b_{t-1} \\[5pt]
+\text{prediction:}&amp; &amp;&amp;\hat{y_{t+1}} = l_{t}+b_{t} \\[5pt]
+&amp; &amp;&amp;\hat{y_{t+h}} = l_t + hb_t
+\end{align}
+\]</span></p></li>
+<li><p><strong>Initial Values:</strong><br />
+The inital values are <span class="math inline">\(l_0\)</span> and <span class="math inline">\(b_0\)</span>.</p></li>
+<li><p><strong>Parameters:</strong><br />
+<span class="math display">\[{\alpha, \beta}\]</span> <br />
+The common method for calculating <span class="math inline">\(\alpha\)</span> is finding the estimates which can minimizing Sum of the Square of Errors (SSE), <span class="math inline">\(\sum_{i=1}^{n}(y_i-\hat{y_i})^2\)</span>, or Mean Square of Errors (MSE), <span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y_i})^2\)</span>.</p></li>
+</ul></li>
+</ul>
+<p><br /></p>
+<ul>
+<li><p><strong><font size="4">Triple Exponential Smoothing (Holt-Winters Method)</font></strong></p>
+<ul>
+<li><strong>Data Assumptions:</strong> <br />
+The data has stationary process on a line with not only trend but also seasonality.</li>
+</ul>
+<pre class="r"><code>mean = 100
+set.seed(123)
+res = rnorm(n = 240, mean = 0, sd = 5)
+trend = 0.2 * c(1:240) + 5
+season = 4 * rep(c(0,1,2,3,2,1,0,-1,-2,-3,-2,-1),240/12)
+myvector = mean + res + trend + season
+dat = ts(myvector, start=c(2017, 1), frequency=12)
+fit = HoltWinters(dat)
+fit_h = forecast(fit, h = 12)
+par(mfrow = c(1, 2))
+plot(stl(dat, s.window = 12), main=&quot;Triple Exponential Smoothing&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>par(mfrow = c(2,2))
+plot(fit)
+plot(fit_h)
+acf(fit_h$residuals, na.action = na.omit)
+pacf(fit_h$residuals, na.action = na.omit)</code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<ul>
+<li><strong>Algorithm:</strong></li>
+</ul>
+<p><span class="math display">\[
+  \begin{align}
+  \quad \text{level:}&amp; &amp;&amp;l_{t} = \alpha (y_{t}-s_{t-m}) + (1-\alpha) (l_{t-1}+b_{t-1}) \\[5pt]
+  \quad \text{trend:}&amp; &amp;&amp;b_{t} = \beta (l_t-l_{t-1}) + (1-\beta) b_{t-1} \\[5pt]
+  \text{seasonal:}&amp; &amp;&amp;s_{t} = \gamma(y_{t}-l_{t-1}-b_{t-1})+(1-\gamma)s_{t-m} \\[5pt]
+  &amp; &amp;&amp;\text{where $m$ is the length of seasonality} \\[5pt]
+  \text{prediction:}&amp;  &amp;&amp;\hat{y_{t+1}} = l_{t}+b_{t}+s_{t-m} \\[5pt]
+  &amp; &amp;&amp; \hat{y_{t+h}} = l_t + hb_t +s_{t-m+h_m^+}\;, \\[5pt]
+  &amp; &amp;&amp;\text{where $h_m^+ = [(h−1) \text{  mod  } m]+1$}
+  \end{align}
+  \]</span></p>
+<ul>
+<li><p><strong>Initial Values:</strong><br />
+The inital values are <span class="math inline">\(l_0\)</span>, <span class="math inline">\(b_0\)</span>, <span class="math display">\[\{s_0^1, s_0^2, ...s_0^m\}\]</span>.</p></li>
+<li><p><strong>Parameters:</strong><br />
+<span class="math display">\[{\alpha, \beta, \gamma}\]</span> <br />
+The common method for calculating <span class="math inline">\(\alpha\)</span> is finding the estimates which can minimizing Sum of the Square of Errors (SSE), <span class="math inline">\(\sum_{i=1}^{n}(y_i-\hat{y_i})^2\)</span>, or Mean Square of Errors (MSE), <span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y_i})^2\)</span>.</p></li>
+</ul></li>
+<li><p><strong><font size="4">Other Forms of Exponential Smoothing Methods</font></strong> <br />
+The above Double and Triple Exponential Smoothing are the simplest case. Prof. Hyndman has listed out all the current 15 forms of Exponential Smoothing models in his book, <a href="http://www.springer.com/gp/book/9783540719168">Forecasting with Exponential Smoothing: The State Space Approach (2008)</a>. The tables are from the p.12 and p.18 of this book. In his book, he also has wonderful explanations for every model. The last table is from his another book, <a href="https://www.otexts.org/fpp/7/6">Forecasting: Principles and practice (2013)</a>. The graph is “forecast profile” which I got from <a href="#ref">Dimitrov (2013)</a> but originated from <a href="#ref">Garden(1987)</a>. <br /><br />
+<img src="/posts/2017-03-29-exponential-smoothing/explist.png" style="width:400px" class="center"/>
+<img src="/posts/2017-03-29-exponential-smoothing/expsmooth.png" style="width:800px" class="center"/>
+<img src="/posts/2017-03-29-exponential-smoothing/exptable.png" style="width:600px" class="center"/>
+<img src="/posts/2017-03-29-exponential-smoothing/forecastprofile.png" style="width:400px" class="center"/></p></li>
+<li><p><strong><font size="4">Strengths and Weaknesses</font></strong></p>
+<ul>
+<li><strong>Strengths</strong>
+<ol style="list-style-type: decimal">
+<li>The alogrithm is explicit and easy to be understood.</li>
+<li>Can be computed quick.</li>
+<li>More weight on recent data.</li>
+<li>Good at short-term forecasts. <br /></li>
+</ol></li>
+<li><strong>Weaknesses</strong>
+<ol style="list-style-type: decimal">
+<li>Need to do research on finding initial values.</li>
+<li>Not good at mid-term and long-term forecasts.</li>
+<li>Can not add explanotary variables.</li>
+<li>Can not construct prediction interval but only point prediction.</li>
+<li>It is hard to meet the data assumptions of stationary but it is still a referable method of prediction.</li>
+</ol></li>
+</ul></li>
+<li><p><strong><font size="4">Further Topics</font></strong></p>
+<ul>
+<li><strong>Multi-seasonality:</strong> <br />
+<a href="#ref">Taylor (2003, 2008)</a> extended Triple Exponential Smoothing model to double and multiple seasonality.</li>
+</ul></li>
+</ul>
+</div>

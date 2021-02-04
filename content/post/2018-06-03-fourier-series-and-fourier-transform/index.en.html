@@ -1,0 +1,150 @@
+---
+title: Fourier Series and Fourier Transform
+author: Yin-Ting
+date: '2018-06-03'
+slug: fourier-series-and-fourier-transform
+aliases: 
+  - /posts/fourier-series-and-fourier-transform
+categories:
+  - Methodology
+tags:
+  - Time Series Analysis
+draft: no
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<ul>
+<li><strong><font size="4">References</font></strong> <br />
+<ul>
+<li><a href="http://www.math.psu.edu/wysocki/M412/Notes412_8.pdf">http://www.math.psu.edu/wysocki/M412/Notes412_8.pdf</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/19763358">https://zhuanlan.zhihu.com/p/19763358</a></li>
+<li><a href="https://www.math.psu.edu/tseng/class/Math251/Notes-PDE%20pt2.pdf">https://www.math.psu.edu/tseng/class/Math251/Notes-PDE%20pt2.pdf</a></li>
+<li><a href="http://www.oulu.fi/sites/default/files/content/files/series.pdf">http://www.oulu.fi/sites/default/files/content/files/series.pdf</a></li>
+<li><a href="http://www.engr.uconn.edu/~lanbo/G377FFTYC.pdf">http://www.engr.uconn.edu/~lanbo/G377FFTYC.pdf</a></li>
+</ul></li>
+</ul>
+<p><br /></p>
+<ul>
+<li><p><strong><font size="4">Fourier Series</font></strong> <br /></p>
+<ul>
+<li><p><strong>Theorem</strong> <br />
+(references: <a href="https://www.math.psu.edu/tseng/class/Math251/Notes-PDE%20pt2.pdf">Second Order Linear Partial Differential Equations</a>, <a href="https://www.zhihu.com/question/20977844">复数形式傅立叶变换的物理意义，相位究竟指的是什么？</a>) <br /></p>
+<p><span class="math inline">\(\text{Suppose } f(x) \text{ is a periodic function with period } T  \text{ and is an integrable function on } [0, T]. \\  \text{Then, the  Fourier Series of } f(x) \text{ can be written as }\)</span></p>
+<p><span class="math display">\[
+  \begin{align}
+  f(x) &amp; = \frac{c_0}{2} + \sum_{n=1}^{\infty} c_ncos(n \cdot \frac{2\pi}{T} \cdot x  + \varphi_n) \\
+  &amp;= \frac{c_0}{2} + \sum_{n=1}^{\infty} c_ncos(\varphi _n)cos(n \cdot \frac{2\pi}{T} \cdot x)+ (-c_n)sin(\varphi _n)sin(n \cdot \frac{2\pi}{T} \cdot x) \\
+  &amp;\text{( let } a_0 = c_0, \;a_n = c_ncos(\varphi _n) \text{ and } b_n = (-c_n)sin(\varphi _n) \;) \\
+  &amp;= \frac{a_0}{2} + \sum_{n=1}^{\infty} a_ncos(n \cdot \frac{2\pi}{T} \cdot x)+ b_nsin(n \cdot \frac{2\pi}{T} \cdot x) \\ 
+  \\
+  \text{where } c_n &amp;= \sqrt{a_n^2 + b_n^2} = \sqrt{c_n^2(cos^2(\varphi _n) + sin^2(\varphi _n))} = \sqrt{c_n^2} \;\; (Amplitude)\\
+  \varphi_n &amp;= tan^{-1}(-\frac{b_n}{a_n}) \;\; (Phase)\\
+  a_0 &amp;= \frac{1}{T}\int_{0}^{T}f(x)dx \\
+  a_n &amp;= \frac{1}{T}\int_{0}^{T}f(x) \cdot cos(n \cdot \frac{2\pi}{T} \cdot x)dx \\
+  b_n &amp;= \frac{1}{T}\int_{0}^{T}f(x) \cdot sin(n \cdot \frac{2\pi}{T} \cdot x)dx
+  \end{align}
+  \]</span></p></li>
+<li><p><strong>Derivation for the Fourier Coefficients, <span class="math inline">\(a_0\)</span>, <span class="math inline">\(a_n\)</span>, <span class="math inline">\(b_n\)</span></strong>: <br />
+(references: <a href="https://www.khanacademy.org/science/electrical-engineering/ee-signals/ee-fourier-series/v/ee-fourier-series-intro">Khan - Fourier Series introduction</a>, <a href="http://www.math.psu.edu/wysocki/M412/Notes412_8.pdf">8 Fourier Series</a>) <br>
+Using the facts that<br />
+<span class="math display">\[
+  \begin{align}
+  \int_{0}^{2 \pi} sin(mx)dx &amp;= 0\; , \forall \text{ integer } m \\
+  \int_{0}^{2 \pi} cos(mx)dx &amp;= 0\; , \forall \text{ non-zero integer } m \\
+  \int_{0}^{2 \pi} sin(mx)cos(nx)dx &amp;= 0\; , \forall \text{ integer } m \text{, } n\\
+  \int_{0}^{2 \pi} cos(mx)cos(nx)dx &amp;= \left\{
+    \begin{matrix}
+    0\;, &amp;\;\; m \neq n \\ 
+    2\pi\;, &amp;\;\; m = n = 0\\
+    \pi\;, &amp;\;\; m = n \neq 0  
+    \end{matrix}\right. \\
+  \int_{0}^{2 \pi} sin(mx)sin(nx)dx &amp;= \left\{
+    \begin{matrix}
+    0 \;, &amp;\;\; m \neq n\\ 
+    \pi \;, &amp;\;\; m = n \neq0 
+    \end{matrix}\right.
+  \end{align}
+  \]</span></p>
+<p>to calculate <span class="math inline">\(\int_{0}^{2 \pi}f(x)dx\)</span>, <span class="math inline">\(\int_{0}^{2 \pi}f(x)cos(mx)dx\)</span> and <span class="math inline">\(\int_{0}^{2 \pi}f(x)sin(mx)dx\)</span>. <br />
+Then obtain the Fourier Coefficients,</p>
+<p><span class="math display">\[
+  \begin{align}
+  a_0 &amp;= \frac{1}{\pi}\int_{0}^{2\pi}f(x)dx \\
+  a_n &amp;= \frac{1}{\pi}\int_{0}^{2\pi}f(x) \cdot cos(n \cdot x)dx \\
+  b_n &amp;= \frac{1}{\pi}\int_{0}^{2\pi}f(x) \cdot sin(n \cdot x)dx 
+  \end{align}
+  \]</span></p>
+<p>Let <span class="math inline">\(x = \frac{2\pi}{T} \cdot y\)</span> and <span class="math inline">\(dx = \frac{2\pi}{T} \cdot dy\)</span>, <br />
+then</p>
+<p><span class="math display">\[
+  \begin{align}
+  a_0 &amp;= \frac{1}{T}\int_{0}^{T}f(x)dx \\
+  a_n &amp;= \frac{1}{T}\int_{0}^{T}f(x) \cdot cos(n \cdot \frac{2\pi}{T} \cdot x)dx \\
+  b_n &amp;= \frac{1}{T}\int_{0}^{T}f(x) \cdot sin(n \cdot \frac{2\pi}{T} \cdot x)dx
+  \end{align}
+  \]</span></p>
+<ul>
+<li><p><strong>Complex Form</strong>: <br />
+(references: <a href="https://en.wikipedia.org/wiki/Euler%27s_formula">wiki-Euler’s formula</a>, <a href="http://www.ee.ic.ac.uk/hp/staff/dmb/courses/E1Fourier/00300_ComplexFourier.pdf">Complex Fourier Series</a>) <br />
+<span class="math inline">\(f(x) = \sum_{n=-\infty}^{\infty} d_ne^{i(n\frac{2\pi}{T}x)}\)</span></p>
+<p>By using Euler’s formula, <span class="math inline">\(e^{ix} = cos(x) + isin(x)\)</span>, we know
+<span class="math display">\[
+ \begin{align}
+ cos(x) &amp;= \frac{e^{ix} + e^{-ix}}{2} \\
+ sin(x) &amp;= \frac{e^{ix} - e^{-ix}}{2i} = \frac{-ie^{ix} + ie^{-ix}}{2}
+ \end{align}
+ \]</span></p></li>
+</ul>
+<p>The <span class="math inline">\(f(x)\)</span> can be rewritten as,</p>
+<p><span class="math display">\[
+  \begin{align}
+  f(x) &amp;= \frac{a_0}{2} + \sum_{n=1}^{\infty} a_n(\frac{1}{2}e^{i(n\frac{2\pi}{T}x)} + \frac{1}{2}e^{-i(n\frac{2\pi}{T}x)}) + b_n(\frac{1}{2}ie^{i(n\frac{2\pi}{T}x)} - \frac{1}{2}ie^{-i(n\frac{2\pi}{T}x)}) \\
+  &amp;= \frac{a_0}{2} + \sum_{n=1}^{\infty} \frac{(a_n - ib_n)}{2}e^{i(n\frac{2\pi}{T}x)} + \frac{(a_n + ib_n)}{2}e^{-i(n\frac{2\pi}{T}x)} \\
+  &amp;= \sum_{n=-\infty}^{\infty}  d_ne^{i(n\frac{2\pi}{T}x)}
+  \end{align}
+  \]</span></p>
+<p>where the <span class="math inline">\(d_n\)</span> is called the Complex Fourier Coefficients,
+<span class="math display">\[
+   \begin{align}
+   d_n = \left\{\begin{matrix}
+    \frac{a_n - ib_n}{2}&amp;, \;\;\;n\geq 1\\ 
+    \frac{a_0}{2}&amp;, \;\;\;n= 0\\ 
+    \frac{a_{\left | n \right |} + ib_{\left | n \right |}}{2}&amp;, \;\;\;n\leq 1
+    \end{matrix}\right.
+   \end{align}
+   \]</span></p></li>
+</ul></li>
+<li><p><strong><font size="4">Fourier Transformation</font></strong> <br />
+It is a process to convert a time function, <span class="math inline">\(f(x)\)</span> from time domain (<span class="math inline">\(x\)</span>) to frequency domain (<span class="math inline">\(n\)</span>). <br /></p>
+<p>Since we know that</p>
+<p><span class="math display">\[
+  \begin{align}
+   \frac{1}{T}\int_{x = 0}^{T}e^{i(n\frac{2\pi}{T}x)}dx 
+   &amp;= \frac{1}{T}\int_{x = 0}^{T}cos(n\frac{2\pi}{T}x) + isin(n\frac{2\pi}{T}x)dx \\ 
+   &amp;= 
+   \left\{\begin{matrix}
+   0, \;\;\;n \neq 0\\
+   1, \;\;\;n = 0
+   \end{matrix}\right.
+  \end{align}
+  \]</span></p>
+<p>Then, we can get</p>
+<p><span class="math display">\[
+  \begin{align}
+  \frac{1}{T}\int_{x = 0}^{T}e^{-i(n\frac{2\pi}{T}x)}f(x)dx 
+  &amp;= \frac{1}{T}\int_{x = 0}^{T}e^{-i(n\frac{2\pi}{T}x)}\sum_{r=-\infty}^{\infty}  d_re^{i(r\frac{2\pi}{T}x)}dx \\
+  &amp;= \sum_{r=-\infty}^{\infty}\int_{x = 0}^{T}d_re^{i(r-n)\frac{2\pi}{T}x}dx \\
+  &amp;= d_n \\
+  &amp;= \left\{\begin{matrix}
+      \frac{a_n - ib_n}{2}&amp;, \;\;\;n\geq 1\\ 
+      \frac{a_0}{2}&amp;, \;\;\;n= 0\\ 
+      \frac{a_{\left | n \right |} + ib_{\left | n \right |}}{2}&amp;, \;\;\;n\leq 1
+      \end{matrix}\right.
+  \end{align}
+  \]</span></p>
+<p>As we can see here, we have converted <span class="math inline">\(f(x)\)</span> from time domain (<span class="math inline">\(x\)</span>) to the frequency domain (<span class="math inline">\(n\)</span>). This process is called Fourier Transformation. Given a certain n, we know its <span class="math inline">\(d_n\)</span> which is composed of <span class="math inline">\(a_n\)</span> and <span class="math inline">\(b_n\)</span>. By doing some calculation, we then get the <span class="math inline">\(c_n\)</span> and <span class="math inline">\(\varphi_n\)</span> which give us enough information to create a function to approach the orginal function <span class="math inline">\(f(x)\)</span>.</p></li>
+<li><p><strong><font size="4">Examples in R</font></strong> <br />
+<a href="http://www.di.fc.ul.pt/~jpn/r/fourier/fourier.html">http://www.di.fc.ul.pt/~jpn/r/fourier/fourier.html</a></p></li>
+</ul>

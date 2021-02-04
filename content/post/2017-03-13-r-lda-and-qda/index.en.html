@@ -1,0 +1,149 @@
+---
+title: R --- LDA and QDA
+author: Yin-Ting
+date: '2017-03-13'
+slug: r-lda-and-qda
+categories: 
+  - R
+tags:
+  - Classification
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>This post shows the R code for LDA and QDA by using funtion <code>lda()</code> and <code>qda()</code> in package <code>MASS</code>. To show how to use these function, I created a function, <code>bvn()</code>, to generate bivariate normal dataset based on the assumptions and then used <code>lda()</code> and <code>qda()</code> on the generated datasets.</p>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><strong><font size="4">Resources for Package ‘MASS’</font></strong>
+<ul>
+<li><a href="https://cran.r-project.org/web/packages/MASS/">CRAN - Package ‘MASS’</a></li>
+<li><a href="https://cran.r-project.org/web/packages/MASS/MASS.pdf">Package ‘MASS’ - Reference manual</a></li>
+</ul></li>
+</ul>
+<ul>
+<li><strong><font size="4"> Example Code </font></strong> <br />
+<ul>
+<li><p><strong>LDA :</strong> <br />
+Suppose our dataset are from <br />
+<span class="math display">\[X_{green}=N(\begin{pmatrix} 0.5\\ -0.5 \end{pmatrix}, \Sigma) \quad
+\text{and} \quad
+X_{red}=N(\begin{pmatrix} -2\\ 0.7 \end{pmatrix}, \Sigma), \\[5pt]
+\text{where} \quad
+\Sigma=\begin{pmatrix} 1&amp;  0.5\\ 0.5&amp;1 \end{pmatrix}.\]</span></p></li>
+<li><p><strong>QDA :</strong> <br />
+Suppose our dataset are from <br />
+<span class="math display">\[X_{green}=N(\begin{pmatrix} -2\\ 0.7 \end{pmatrix}, \Sigma_1) \quad
+\text{and} \quad
+X_{red}=N(\begin{pmatrix} 0.5\\ -0.5 \end{pmatrix}, \Sigma_2), \\[5pt]
+\text{where} \quad
+\Sigma_1=\begin{pmatrix} 1&amp;  0.5\\ 0.5&amp;1 \end{pmatrix} \quad \text{and} \quad
+\Sigma_2=\begin{pmatrix} 0.8&amp;  -0.7\\ -0.7&amp; 0.8 \end{pmatrix}.\]</span></p></li>
+</ul></li>
+</ul>
+<pre class="r"><code>if (!require(&quot;MASS&quot;)) install.packages(&quot;MASS&quot;)
+if (!require(&quot;ggplot2&quot;)) install.packages(&quot;ggplot2&quot;)
+if (!require(&quot;gridExtra&quot;)) install.packages(&quot;gridExtra&quot;)
+
+library(MASS)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+
+########################################
+#### Generate Bivariate Normal Data ####
+########################################
+set.seed(12345)
+bvn=function(m1,m2,sigma1,sigma2,n1,n2){
+      d1 &lt;- mvrnorm(n1, mu = m1, Sigma = sigma1 )
+      d2 &lt;- mvrnorm(n2, mu = m2, Sigma = sigma2 )
+      d=rbind(d1,d2)
+      colnames(d)=c(&quot;X1&quot;,&quot;X2&quot;)
+      d=data.frame(d)
+      d$group=c(rep(&quot;Red&quot;,n1),rep(&quot;Green&quot;,n2))
+      list(data = d)
+}
+
+m_1 &lt;- c(0.5, -0.5) # mean of the first group
+m_2 &lt;- c(-2, 0.7)  # mean of the second group
+sigma_1 &lt;- matrix(c(1,0.5,0.5,1), nrow=2) # covariance matrix
+sigma_2 &lt;- matrix(c(0.8,-0.7,-0.7,0.8), nrow=2)
+
+# The training dataset
+data_lda = bvn(m_1,m_2,sigma_1,sigma_1,n1=1500,n2=2000)$data
+data_qda = bvn(m_1,m_2,sigma_1,sigma_2,n1=1500,n2=2000)$data
+head(data_lda, 3)</code></pre>
+<pre><code>##          X1          X2 group
+## 1 1.0943941 -0.08022845   Red
+## 2 1.4497239 -0.22089273   Red
+## 3 0.1516277 -0.34094657   Red</code></pre>
+<pre class="r"><code>###############################
+#### Generate Test Dataset ####
+###############################
+test_lda = bvn(m_1,m_2,sigma_1,sigma_1,n1=100,n2=100)$data
+test_qda = bvn(m_1,m_2,sigma_1,sigma_2,n1=100,n2=100)$data
+
+###############################################
+#### Scatter Plot of the Generated Dataset ####
+###############################################
+p1=ggplot(data_lda, aes(x=X1, y=X2)) +
+    geom_point(aes(colour = group)) +
+    ggtitle(&quot;Dataset for LDA&quot;)
+p2=ggplot(data_qda, aes(x=X1, y=X2)) +
+    geom_point(aes(colour = group)) +
+    ggtitle(&quot;Dataset for QDA&quot;)
+grid.arrange(p1, p2, ncol = 2)</code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-1-1.png" width="768" /></p>
+<pre class="r"><code>#############
+#### LDA ####
+#############
+m_lda=lda(group~X1+X2, data=data_lda)
+m_lda</code></pre>
+<pre><code>## Call:
+## lda(group ~ X1 + X2, data = data_lda)
+## 
+## Prior probabilities of groups:
+##     Green       Red 
+## 0.5714286 0.4285714 
+## 
+## Group means:
+##               X1         X2
+## Green -1.9873353  0.6966975
+## Red    0.5254939 -0.4972749
+## 
+## Coefficients of linear discriminants:
+##           LD1
+## X1  1.1111290
+## X2 -0.8491722</code></pre>
+<pre class="r"><code># The Confusion Matrix
+m_lda.pred=predict(m_lda,test_lda)
+table(true=test_lda$group, pred=m_lda.pred$class)</code></pre>
+<pre><code>##        pred
+## true    Green Red
+##   Green    97   3
+##   Red       7  93</code></pre>
+<pre class="r"><code>#############
+#### QDA ####
+#############
+m_qda=qda(group~X1+X2, data=data_qda)
+m_qda</code></pre>
+<pre><code>## Call:
+## qda(group ~ X1 + X2, data = data_qda)
+## 
+## Prior probabilities of groups:
+##     Green       Red 
+## 0.5714286 0.4285714 
+## 
+## Group means:
+##               X1         X2
+## Green -1.9913743  0.6829456
+## Red    0.4691391 -0.4981505</code></pre>
+<pre class="r"><code># The Confusion Matrix
+m_qda.pred=predict(m_qda,test_qda)
+table(true=test_qda$group, pred=m_qda.pred$class)</code></pre>
+<pre><code>##        pred
+## true    Green Red
+##   Green    98   2
+##   Red       4  96</code></pre>
+</div>

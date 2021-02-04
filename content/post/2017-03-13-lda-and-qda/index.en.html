@@ -1,0 +1,259 @@
+---
+title: LDA and QDA
+author: Yin-Ting
+date: '2017-03-13'
+slug: lda-and-qda
+aliases: 
+  - /posts/lda-and-qda
+categories:
+  - Methodology
+tags:
+  - Classification
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>LDA and QDA are classification methods based on the concept of <a href="/posts/naive-bayes-classifier">Bayes’ Theorem</a>
+with assumption on conditional Multivariate Normal Distribution. And, because of this assumption, LDA and QDA can only be used when all explanotary variables are numeric.</p>
+<p>This post is my note about LDA and QDA, classification teachniques. All the contents in this post are based on my reading on many resources which are listed in the References part.</p>
+<div id="references" class="section level3">
+<h3>References</h3>
+<ul>
+<li><strong>Books</strong>
+<ol style="list-style-type: decimal">
+<li><a href="https://statweb.stanford.edu/~tibs/ElemStatLearn/">The Elements of Statistical Learning:Data Mining, Inference, and Prediction</a></li>
+<li><a href="http://www-bcf.usc.edu/~gareth/ISL/">An Introduction to Statistical Learning with Applications in R</a></li>
+</ol></li>
+</ul>
+</div>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><strong><font size="4">Name</font></strong> <br />
+<ul>
+<li>Linear Discriminant Analysis (LDA)</li>
+<li>Quadratic Discriminant Analysis (QDA)
+<br / >
+<br / ></li>
+</ul></li>
+<li><strong><font size="4">Data Type</font></strong>
+<ul>
+<li><strong>Reponse Variable</strong>: Categorical</li>
+<li><strong>Explanatory Variable</strong>: Numeric
+<br / >
+<br / ></li>
+</ul></li>
+<li><strong><font size="4">Multivariate Normal Distribution</font></strong></li>
+</ul>
+<p><span class="math display">\[
+\begin{align}
+X \sim N(\mu, \Sigma) &amp;= \frac{1}{(2\pi)^\frac{p}{2}|\Sigma|^\frac{1}{2}}\exp(-\frac{1}{2}(X-\mu)^T\Sigma^{-1}(X-\mu))
+\end{align}
+\]</span></p>
+<p><br / >
+<br / ></p>
+<ul>
+<li><strong><font size="4">Assumptions</font></strong> <br />
+<ul>
+<li><p><strong>LDA</strong>: <br />
+Given a class <span class="math inline">\(k\)</span>, the predictors in this class, <span class="math inline">\(X_k=(X_{1k},X_{2k},\cdots,X_{pk})\)</span>, follows multivariate normal distribution with mean <span class="math inline">\(\mu_k\)</span> and covariance matrix <span class="math inline">\(\Sigma\)</span>. And, the covariance matrix are all the same for all classes.
+<br />
+<span class="math display">\[
+\begin{align}
+P(X=x|Y=k) &amp;= N(\mu_k, \Sigma) \\[5pt]
+\text{where    } \mu_k &amp;=
+\begin{pmatrix}
+\mu_{1k}\\
+\mu_{2k}\\
+\vdots\\
+\mu_{pk}
+\end{pmatrix} \\[5pt]
+\Sigma &amp;=
+\begin{pmatrix}
+\sigma_1^2&amp;  \sigma_{12}&amp;  \cdots&amp; \sigma_{1p} \\
+\sigma_{12}&amp;  \sigma_2^2&amp;  \cdots&amp; \sigma_{2p}\\
+\vdots&amp;  \vdots&amp;  \ddots&amp; \vdots\\
+\sigma_{1p}&amp; \sigma_{2p} &amp; \cdots &amp; \sigma_p^2
+\end{pmatrix}, \, \forall \,k
+\end{align}
+\]</span></p></li>
+<li><p><strong>QDA</strong>: <br />
+Given a class <span class="math inline">\(k\)</span>, the predictors in this class, <span class="math inline">\(X_k=(X_{1k},X_{2k},\cdots,X_{pk})\)</span>, follows multivariate normal distribution with mean <span class="math inline">\(\mu_k\)</span> and covariance matrix <span class="math inline">\(\Sigma_k\)</span>. And, the covariance matrix can <strong>NOT</strong> be the same for all classes.
+<br />
+<span class="math display">\[
+\begin{align}
+P(X=x|Y=k) &amp;= N(\mu_k, \Sigma_k) \\[5pt]
+\text{where    } \mu_k &amp;=
+\begin{pmatrix}
+\mu_{1k}\\
+\mu_{2k}\\
+\vdots\\
+\mu_{pk}
+\end{pmatrix} \\[5pt]
+\Sigma_k &amp;=
+\begin{pmatrix}
+\sigma_{1_k}^2&amp;  \sigma_{12_k}&amp;  \cdots&amp; \sigma_{1p_k} \\
+\sigma_{12_k}&amp;  \sigma_{2_k}^2&amp;  \cdots&amp; \sigma_{2p_k}\\
+\vdots&amp;  \vdots&amp;  \ddots&amp; \vdots\\
+\sigma_{1p_k}&amp; \sigma_{2p_k} &amp; \cdots &amp; \sigma_{p_k}^2
+\end{pmatrix}
+\end{align}
+\]</span>
+<br /><br /></p></li>
+</ul></li>
+</ul>
+<pre class="r"><code>  if (!require(&quot;ggplot2&quot;)) install.packages(&quot;ggplot2&quot;)
+  if (!require(&quot;MASS&quot;)) install.packages(&quot;MASS&quot;)
+  if (!require(&quot;grid&quot;)) install.packages(&quot;grid&quot;)
+  if (!require(&quot;gridExtra&quot;)) install.packages(&quot;gridExtra&quot;)
+
+  ########################################
+  #### Generate Bivariate Normal Data ####
+  ########################################
+  set.seed=12345
+  bvm=function(m1,m2,sigma1,sigma2,n1,n2){
+      d1 &lt;- mvrnorm(n1, mu = m1, Sigma = sigma1 )
+      d2 &lt;- mvrnorm(n2, mu = m2, Sigma = sigma2 )
+      d=rbind(d1,d2)
+      colnames(d)=c(&quot;X1&quot;,&quot;X2&quot;)
+      d=data.frame(d)
+      d$group=c(rep(&quot;1&quot;,n1),rep(&quot;2&quot;,n2))
+      list(data = d)
+  }
+
+  m_1 &lt;- c(0.5, -0.5)
+  m_2 &lt;- c(-2, 0.7)
+  sigma_1 &lt;- matrix(c(1,0.5,0.5,1), nrow=2)
+  sigma_2 &lt;- matrix(c(0.8,-0.7,-0.7,0.8), nrow=2)
+
+  p1=ggplot(bvm(m_1,m_2,sigma_1,sigma_1,n1=2000,n2=2000)$data,
+      aes(x=X1, y=X2)) +
+      stat_density2d(geom=&quot;density2d&quot;, aes(color = group),contour=TRUE)+
+      ggtitle(&quot;Under LDA assumption&quot;)
+  p2=ggplot(bvm(m_1,m_2,sigma_1,sigma_2,n1=2000,n2=2000)$data,
+      aes(x=X1, y=X2)) +
+      stat_density2d(geom=&quot;density2d&quot;, aes(color = group),contour=TRUE)+
+      ggtitle(&quot;Under QDA assumption&quot;)
+  grid.arrange(p1, p2, ncol = 2)</code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-1-1.png" width="768" /></p>
+<ul>
+<li><strong><font size="4">Algorithm</font></strong> <br />
+Given a class variable <span class="math display">\[Y= \{ 1, 2,..., K \}, K\geq2\]</span> and explanatory variables, <span class="math display">\[X=\{ X_1, X_2,..., X_p \}, \]</span> the Bayes’ Theorem can be written as: <br />
+<ul>
+<li><p><strong>LDA</strong>: <br /></p>
+<p><span class="math display">\[
+\begin{align}
+P(Y=k|X=x) &amp;= \frac{P(X=x|Y=k)P(Y=k)}{P(X=x)} \\[5pt]
+&amp;= \frac{P(X=x|Y=k)P(Y=k)}{\sum_{i=1}^{K}P(X=x|Y=i)P(Y=i)}
+\end{align}
+\]</span>
+<br /><br />
+Then, we define a classifier which is a function, <span class="math display">\[C \colon \mathbb{R}^p \rightarrow \{ 1, 2,..., K \}\]</span> and <br /><br /></p>
+<p><span class="math display">\[
+\begin{align}
+C(x) &amp;=\underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}}P(Y=k|X=x) \\[5pt]
+  &amp;= \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}}\log P(Y=k|X=x) \\[5pt]
+  &amp;\propto \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}} \log P(X=x|Y=k) + \log P(Y=k) \\[5pt]
+  \quad &amp;(\text{by assuming that } P(X=x|Y=k) \sim N(\mu_k, \Sigma)) \\[5pt]
+  &amp;= \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}} \log N(\mu_k, \Sigma) + \log P(Y=k) \\[5pt]
+  &amp;=  \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}} \log [\frac{1}{(2\pi)^\frac{p}{2}|\Sigma|^\frac{1}{2}}\exp(-\frac{1}{2}(X-\mu_k)^T\Sigma^{-1}(X-\mu_k))] + \log P(Y=k) \\[5pt]
+  &amp;\propto \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}}  -\frac{1}{2}(X-\mu_k)^T\Sigma^{-1}(X-\mu_k) + \log (Y=k) \\[5pt]
+  &amp;= \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}}  X^T\Sigma^{-1}\mu_k - \frac{1}{2}\mu_k^T\Sigma\mu_k + \log P(Y=k) \\[5pt]
+  &amp;\equiv  \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}} \delta_k(x)
+\end{align}
+ \]</span>
+<br /><br />
+To calculate <span class="math inline">\(C(X)\)</span>, we need to plug in the following estimates which are all unbiased.
+<br />
+<span class="math display">\[
+\begin{align}
+\hat{P}(Y&amp;=k) = \frac{n_k}{n}, \quad \sum_{i=1}^{K}n_i = n \\[5pt]
+\hat{\mu_k} &amp;= \begin{pmatrix}
+\hat{\mu_{1k}}\\
+\hat{\mu_{2k}}\\
+\vdots\\
+\hat{\mu_{pk}}
+\end{pmatrix} =
+\begin{pmatrix}
+\bar{X}_{1k} = \frac{1}{n_1}\sum_{i=1}^{n_1}x_{ik}\\
+\bar{X}_{2k}\\
+\vdots\\
+\bar{X}_{pk}
+\end{pmatrix} \\[5pt]
+\hat\Sigma &amp;= \text{Pooled Covariance Matrix because of total K classes} \\[5pt]
+&amp;= \frac{1}{n-K} \sum_{i=1}^{K}\sum_{j=1}^{n_k}(x_{jk}-\hat{\mu_k})(x_{jk}-\hat{\mu_k})^T
+\end{align}
+\]</span>
+<br /></p></li>
+<li><p><strong>QDA</strong>: <br />
+The function of classifier, <span class="math inline">\(C(x)\)</span>, is as following. <br /></p>
+<p><span class="math display">\[
+\begin{align}
+C(x) &amp;=\underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}} \log P(Y=k|X=x) \\[5pt]
+&amp;\propto \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}} \log P(X=x|Y=k) + \log P(Y=k) \\[5pt]
+\quad &amp;(\text{by assuming that } P(X=x|Y=k) \sim N(\mu_k, \Sigma_k)) \\[5pt]
+&amp;= \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}} \log N(\mu_k, \Sigma_k) + \log P(Y=k) \\[5pt]
+&amp;=  \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}} \log [\frac{1}{(2\pi)^\frac{p}{2}|\Sigma_k|^\frac{1}{2}}\exp(-\frac{1}{2}(X-\mu_k)^T\Sigma_k^{-1}(X-\mu_k))] + \log P(Y=k) \\[5pt]
+  &amp;\propto \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}}  -\frac{1}{2}(X-\mu_k)^T\Sigma_k^{-1}(X-\mu_k) - \frac{1}{2}|\Sigma_k|+\log (Y=k) \\[5pt]
+  &amp;= \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}}  -\frac{1}{2}X^T\Sigma_kX+X^T\Sigma_k^{-1}\mu_k - \frac{1}{2}\mu_k^T\Sigma_k\mu_k - \frac{1}{2}|\Sigma_k| + \log P(Y=k) \\[5pt]
+  &amp;\equiv  \underset{k\in \{ 1, 2,..., K \} }{\operatorname{argmax}} \delta_k(x)
+\end{align}
+\]</span>
+<br />
+<br />
+The estimators are the same as ones in LDA except for <span class="math inline">\(\Sigma_k\)</span>.<br />
+<br />
+<span class="math display">\[
+\begin{align}
+\hat\Sigma_k &amp;= \text{Covariance Matrix in class k} \\[5pt]
+&amp;= \frac{1}{n_k-1} \sum_{j=1}^{n_k}(x_{jk}-\hat{\mu_k})(x_{jk}-\hat{\mu_k})^T
+\end{align}
+\]</span>
+<br /></p></li>
+</ul></li>
+<li><strong><font size="4">Decision Boundary</font></strong> <br />
+<ul>
+<li><p><strong>LDA</strong>: <br />
+The decision boundary of LDA is a straight line which can be derived as below. <br />
+<span class="math display">\[
+  \begin{align}
+  &amp;\delta_k(x) - \delta_l(x) = 0 \\[5pt]
+  &amp;\Rightarrow X^T\Sigma^{-1}(\mu_k-\mu_l) - \frac{1}{2}(\mu_k+\mu_l)^T\Sigma(\mu_k-\mu_l)+\log \frac{P(Y=k)}{P(Y=l)} = 0 \\[5pt]
+  &amp;\Rightarrow b_1x+b_0=0
+  \end{align}
+  \]</span></p></li>
+<li><p><strong>QDA</strong>: <br />
+The decision boundary of QDA is a quadratic line which can be derived as below. <br />
+<span class="math display">\[
+  \begin{align}
+  &amp;\delta_k(x) - \delta_l(x) = 0 \\[5pt]
+  &amp;\Rightarrow -\frac{1}{2}X^T(\Sigma_k -\Sigma_l)X + X^T(\Sigma_k^{-1}\mu_k-\Sigma_l^{-1}\mu_l)-\frac{1}{2}(\mu_k^T\Sigma_k\mu_k-\mu_l^T\Sigma_l\mu_l)\\[5pt]
+  &amp;\quad -\frac{1}{2}(|\Sigma_k|-|\Sigma_l|)+ \log\frac{P(Y=k)}{P(Y=l)}=0\\[5pt]
+  &amp; \Rightarrow b_2x^2+b_1x+b_0=0
+  \end{align}
+  \]</span>
+<br /><br />
+The following graphs are from <a href="https://statweb.stanford.edu/~tibs/ElemStatLearn/">The Elements of Statistical Learning:Data Mining, Inference, and Prediction</a> which gave us a clear idea how the decision bounday looks like in LDA and QDA.</p>
+<p><img src="/posts/2017-03-13-lda-and-qda/ldaqda_1.png" style="width:600px" class = "center"/>
+<img src="/posts/2017-03-13-lda-and-qda/ldaqda_2.png" style="width:600px" class = "center"/></p></li>
+</ul></li>
+<li><strong><font size="4">Strengths and Weaknesses</font></strong> <br />
+<ul>
+<li><strong>Strengths</strong>: <br />
+<ul>
+<li>It is a simple and intuitive method.</li>
+</ul></li>
+<li><strong>Weaknesses</strong>: <br />
+<ol style="list-style-type: decimal">
+<li>In real life, it is really hard to have a dataset fit the assumption of multivariate normal distribution given classes. But we still can use this method even though the assumption is not met.</li>
+<li>It only makes sense when all the predictors are numeric.</li>
+</ol></li>
+</ul></li>
+<li><strong><font size="4">Further topics</font></strong> <br />
+<ul>
+<li><strong>Reduced-Rank Linear Discriminant Analysis</strong> (<a href="https://statweb.stanford.edu/~tibs/ElemStatLearn/">The Elements of Statistical Learning:Data Mining, Inference, and Prediction</a>, p.113 - p.119) This is about finding a decision bounday in LDA to which can maximized between-class variance relatively to the within-class variance.
+<img src="/posts/2017-03-13-lda-and-qda/reduced_lda.png" style="width:600px" class = "center"/></li>
+</ul></li>
+</ul>
+</div>

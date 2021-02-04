@@ -1,0 +1,169 @@
+---
+title: 'How Web Scraping eases my job searching pain? - Part III : Make it More Efficient'
+author: Yin-Ting
+date: '2017-07-20'
+slug: web-scraping-3
+aliases: 
+  - /posts/web-scraping-3
+categories:
+  - Others
+tags:
+  - Website
+draft: no
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p><font color="darkred">
+<strong>Update : 2018-05-06</strong> <br /></p>
+<p>I have found that the website structure of <a href="https://www.indeed.com/">Indeed</a>, <a href="https://www.monster.com/">Monster</a>, <a href="http://www.dice.com/">Dice</a>, <a href="http://www.careerbuilder.com/">Careerbuilder</a> have been changed since I wrote these posts. So, some of my code may not work now. But, I think the concept and the process is still the same.
+</font></p>
+<hr />
+<p><strong>The Github repository for this project :</strong> <a href="https://github.com/choux130/webscraping_example">choux130/webscraping_example</a>.</p>
+<p>From the previous posts, <a href="/posts/web-scraping-1/">How Web Scraping eases my job searching pain? - Part I : Scrape contents from one URL</a> and <a href="/posts/web-scraping-2/">How Web Scraping eases my job searching pain? - Part II : Scrape contents from a list of URLs</a>, now we know how to scrape all the job information from the four different job searching website and save them into four different <code>.csv</code> file. To make all things become more neat and fast, I put all the Python scripts into one customized package, <code>scrape_pack</code>, then combine it with the parallel computing module, <code>multiprocessing</code>, to speed up the process time.</p>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><strong><font size="4">References</font></strong> <br />
+<ol style="list-style-type: decimal">
+<li><a href="https://docs.python.org/2/library/multiprocessing.html">16.6. multiprocessing — Process-based “threading” interface</a></li>
+<li><a href="https://python-packaging.readthedocs.io/en/latest/">How To Package Your Python Code</a></li>
+<li><a href="https://www.blog.pythonlibrary.org/2012/07/08/python-201-creating-modules-and-packages/">Python 201: Creating Modules and Packages</a></li>
+</ol></li>
+<li><strong><font size="4">Steps</font></strong> <br />
+<ol style="list-style-type: decimal">
+<li><p>Have all the path and files ready. <br />
+<span>A Python package is a folder with a <code>_init_.py</code> file (with nothing in it) and your other <code>.py</code> files. We can save all the functions and variables in the <code>.py</code> files and then call them later when we need them. <br />
+Take this project as an example, <code>scrape_pack</code> is the name of my package. <code>one_url.py</code> is about the code I used in <a href="/posts/web-scraping-1/">How Web Scraping eases my job searching pain? - Part I : Scrape contents from one URL</a> and <code>multi_url.py</code> is about the code in <a href="/posts/web-scraping-2/">How Web Scraping eases my job searching pain? - Part II : Scrape contents from a list of URLs</a>. <code>call_packages.py</code> is the file that I am going to execute in the end. This script is the place I set all the arguments, run the parallel computing and decide where to save the final <code>.csv</code> file. </span></p>
+<pre class="python"><code>___ webscraping_example (the directory folder)
+      |___ call_packages.py (the executing file)
+      |___ scrape_pack (my package folder)
+            |___ _init_.py 
+            |___ one_url.py
+            |___ multi_url.py</code></pre></li>
+<li><p>Prepare the scripts (<code>one_url.py</code> and <code>multi_url.py</code>) in the package folder, <code>scrape_pack</code>. <br />
+<span>Basically, I just transformed all the python codes in the previous two posts into functions which I can use them in the parallel computing part later. Please check out my <a href="https://github.com/choux130/webscraping_example">Github repo - webscraping_example</a> for the complete code.</span></p></li>
+<li><p>Execute parallel computing in the <code>call_packages.py</code> file.</p>
+<ul>
+<li><p>Assign the directory to the place I store the package folder.</p>
+<pre><code>``` python
+################################
+##### Assign the directory #####
+################################
+import os
+
+path = &#39;/path/webscraping_example&#39;
+os.chdir(path) # change the directory to the assigned path
+# print(os.getcwd()) # print out the current directory
+```</code></pre></li>
+<li><p>Import libraries and the customized package, <code>scrape_pack</code>.</p>
+<pre><code>```python
+#######################################################
+##### Import libraries and the customized package #####
+#######################################################
+import pandas
+import numpy
+import datetime
+import multiprocessing as mp
+import scrape_pack.one_url
+import scrape_pack.multi_url
+```</code></pre></li>
+<li><p>Set the arguments for scraping the job searching websites.</p>
+<pre><code>```python
+#############################
+##### Setting Arguments #####
+#############################
+input_job = &quot;Data Scientist&quot;
+input_quote = False # add quotation marks(&quot;&quot;) to your input_job
+input_city = &quot;Durham&quot; # leave empty if input_city is not specified
+input_state = &quot;NC&quot;
+
+sign_indeed = &quot;+&quot;
+sign_monster = &quot;-&quot;
+sign_dice = &quot;+&quot;
+sign_careerbuilder = &quot;-&quot;
+
+BASE_URL_indeed = &#39;http://www.indeed.com&#39;
+BASE_URL_monster = &#39;https://www.monster.com&#39;
+BASE_URL_dice = &#39;https://www.dice.com&#39;
+BASE_URL_careerbuilder = &#39;http://www.careerbuilder.com&#39;
+
+# this is for the name of the .csv file
+now = datetime.datetime.now()
+now_str_name = now.strftime(&quot;%m%d%Y&quot;)
+```</code></pre></li>
+<li><p>Scrape out all the jobs’ URL from the four job searching websites using the functions in the customized package. And, save all into one data frame.<br />
+<span>More details about how to do: <a href="/posts/web-scraping-1/">How Web Scraping eases my job searching pain? - Part I : Scrape contents from one URL</a></span></p>
+<pre><code>```python
+###############################
+##### Scrape from one url #####
+###############################
+job_df_indeed = scrape_pack.one_url.basic_indeed(BASE_URL_indeed, input_job, input_city, input_state, input_quote, sign_indeed)
+job_df_monster = scrape_pack.one_url.basic_monster(BASE_URL_monster, input_job, input_city, input_state, input_quote, sign_monster)
+job_df_dice = scrape_pack.one_url.basic_dice(BASE_URL_dice, input_job, input_city, input_state, input_quote, sign_dice)
+job_df_careerbuilder = scrape_pack.one_url.basic_careerbuilder(BASE_URL_careerbuilder, input_job, input_city, input_state, input_quote, sign_careerbuilder)
+
+# print(job_df_indeed.shape)
+# print(job_df_monster.shape)
+# print(job_df_dice.shape)
+# print(job_df_careerbuilder.shape)
+
+# combine the four dataframes
+job_df_all = [job_df_indeed, job_df_monster, job_df_dice, job_df_careerbuilder]
+df = pandas.concat(job_df_all)
+df.columns = [&#39;from&#39;,&#39;date&#39;,&#39;job_id&#39;,&#39;job_title&#39;,&#39;job_company&#39;,&#39;job_location&#39;,&#39;job_link&#39;]
+df.drop_duplicates([&#39;job_title&#39;, &#39;job_company&#39;], keep=&#39;first&#39;) # delete duplicates
+# print(df.shape)
+```</code></pre></li>
+<li><p>Parallelly scrape all the URLs in the created data frame. Then, save all the results into one <code>.csv</code> file. <br />
+<span>More details about how to do:<a href="/posts/web-scraping-2/">How Web Scraping eases my job searching pain? - Part II : Scrape contents from a list of URLs</a></span></p>
+<pre><code>```python
+######################################
+##### Scrape from a list of URLs #####
+######################################
+lks = df[&#39;job_link&#39;]
+ll = [link for link in lks]
+# print(len(ll))
+
+# parallel computing to increse the speed
+if __name__ == &#39;__main__&#39;:
+  pool = mp.Pool(processes = 8)
+  results = pool.map(scrape_pack.multi_url.scrape_job, ll) # save the results
+  pool.close()
+  pool.join()
+
+# add the results to the origianl data frame 
+job_type = [d[&#39;type&#39;] for d in results]
+job_skills = [d[&#39;skills&#39;] for d in results]
+job_edu = [d[&#39;edu&#39;] for d in results]
+job_major = [d[&#39;major&#39;] for d in results]
+job_keywords = [d[&#39;keywords&#39;] for d in results]
+
+df[&#39;job_type&#39;] = job_type 
+df[&#39;job_skills&#39;] = job_skills
+df[&#39;job_edu&#39;] = job_edu
+df[&#39;job_major&#39;] = job_major
+df[&#39;job_keywords&#39;] = job_keywords
+
+# save the dataframe
+df.to_csv(path + &#39;/output/&#39;+ &#39;job_all_&#39; + now_str_name + &#39;.csv&#39;)
+```</code></pre></li>
+</ul></li>
+<li><p>FINALLY, ALL DONE!</p></li>
+</ol></li>
+<li><strong><font size="4">Difficulties</font></strong> <br />
+<ul>
+<li>Always need to update the code. <br />
+<span>Job searching websites are modified very often and it is likely to cause the changes on its source HTML code. Hence, we also need to adjust our code based on that (especially the code on <a href="/posts/web-scraping-1/">Part I</a>, or we would not be able to get the data we want.</span></li>
+</ul></li>
+<li><strong><font size="4">Future works</font></strong> <br />
+<ol style="list-style-type: decimal">
+<li>Code is cold! I want a user-friendly web app for this personal job filtering project. <br />
+<span>I have heard people having wonderful experience on using <a href="https://www.djangoproject.com/">Django</a> to create their websites or web apps. After having experience on <a href="https://jekyllrb.com/">Jekyll</a> for website setup and <a href="https://shiny.rstudio.com/">R Shiny</a>, I definitely want to give it a try on Django and look forward for seeing how cool it can be!</span></li>
+<li>Add some analytics to make it more powerful. <br />
+<span>Well, all the data I have now is all about text. So, <a href="https://en.wikipedia.org/wiki/Text_mining">text mining</a> will definitely be a good point to start. Like what I mentioned in <a href="/posts/web-scraping-2/">How Web Scraping eases my job searching pain? - Part II : Scrape contents from a list of URLs</a>, the <a href="https://janav.wordpress.com/2013/10/27/tf-idf-and-cosine-similarity/">Term Frequency and Inverse Document Frequency (TF - IDF)</a> in <a href="https://blog.algorithmia.com/introduction-natural-language-processing-nlp/">Nature Language Process</a> is absolutely worth for me to try. My expectation on this analysis will be not only automatically helping me find out the jobs I am interested in but also give me a priority list. (What I have done for this project is only on the stage of subjectly classification each job and at most using sorting to help me which is not a smart method at all).<br />
+</span></li>
+</ol></li>
+</ul>
+</div>

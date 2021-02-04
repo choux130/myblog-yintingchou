@@ -1,0 +1,91 @@
+---
+title: State Space Model for Exponential Smoothing
+author: Yin-Ting
+date: '2017-05-02'
+slug: state-space-model-for-exponential-smoothing
+categories:
+  - Methodology
+tags:
+  - Time Series Analysis
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>The main weakness of original <a href="/posts/exponential-smoothing">Exponential Smoothing Method</a> is that it can only provide point estimation. Hyndman (2002) proposed using state space framework to rewrite the original exponential smoothing algorithm and then give distribution assumption on the error terms to calculate the prediction interval. There are two types of error terms in the state space model: Additive and Multiplicative. The point estimator for these two models are the same but the prediction intervals are different.</p>
+<p>This post is my note about learning State Space Model for Exponential Smoothing. All the contents in this post are based on my reading on many resources which are listed in the References part.</p>
+<div id="references" class="section level3">
+<h3>References</h3>
+<ul>
+<li><strong>Paper</strong>
+<ul>
+<li>Hyndman, Rob J., Anne B. Koehler, Ralph D. Snyder, and Simone Grose. “A state space framework for automatic forecasting using exponential smoothing methods.” International Journal of Forecasting 18, no. 3 (2002): 439-454.</li>
+</ul></li>
+<li><strong>Book</strong>
+<ul>
+<li><a href="http://www.springer.com/gp/book/9783540719168">Forecasting with Exponential Smoothing: The State Space Approach (2008)</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><p><strong><font size="4">15 Forms of Exponential Smoothing Methods</font></strong><br />
+This table are from the p.18 of the book, <a href="http://www.springer.com/gp/book/9783540719168">Forecasting with Exponential Smoothing: The State Space Approach (2008)</a>.</p>
+<p><img src="/posts/2017-05-02-state-space-model-for-exponential-smoothing/expsmooth.png" style="width:800px" class="center" /> <br /></p></li>
+<li><p><strong><font size="4">State Space Model</font></strong> <br />
+There are two types of State Space model: Additive and Multiplicative Error terms. And the original 15 Forms of Exponential Smoothing Methods can be reexpress in the form of either State Space Model form. <br /></p>
+<ul>
+<li><p><strong>Algorithm</strong> <br /></p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Additive Error</strong> <br />
+We assume,</p>
+<p><span class="math display">\[
+   \begin{align}
+   \varepsilon_t &amp;= y_t-\mu_t = y_t - \hat{y_t} \\[5pt]
+   \varepsilon_t &amp;\sim NID(0,\sigma^2)
+   \end{align}
+   \]</span></p>
+<p>and then plug <span class="math display">\[y_t = \hat{y_t} + \varepsilon _t\]</span> into the original 15 Forms of Exponential Smoothing Methods, we can get their model expression in the additive state space form. The table are from the p.21 of the book, <a href="http://www.springer.com/gp/book/9783540719168">Forecasting with Exponential Smoothing: The State Space Approach (2008)</a>.
+<img src="/posts/2017-05-02-state-space-model-for-exponential-smoothing/additive.png" style="width:500px" class = "center" /></p></li>
+<li><p><strong>Multiplicative Error</strong> <br />
+We assume,</p>
+<p><span class="math display">\[
+   \begin{align}
+   \varepsilon_t &amp;= \frac{y_t-\mu_t}{\mu_t} =\frac{y_t-\hat{y_t}}{\hat{y_t}} \\[5pt]
+   \varepsilon_t &amp;\sim NID(0,\sigma^2)
+   \end{align}
+   \]</span></p>
+<p>and then plug <span class="math display">\[y_t = \hat{y_t} + \hat{y_t}\varepsilon _t = \hat{y_t}(1+\varepsilon _t)\]</span> into the original 15 Forms of Exponential Smoothing Methods, we can get their model expression in the multiplicative state space form. The table are from the p.22 of the book, <a href="http://www.springer.com/gp/book/9783540719168">Forecasting with Exponential Smoothing: The State Space Approach (2008)</a>.
+<img src="/posts/2017-05-02-state-space-model-for-exponential-smoothing/multiplicative.png" style="width:800px"/></p></li>
+</ol></li>
+<li><p><strong>Initial Values:</strong><br />
+The inital values are <span class="math inline">\(l_0\)</span>, <span class="math inline">\(b_0\)</span>, <span class="math inline">\(\{s_0^1, s_0^2, ...s_0^m\}.\)</span> Hyndman (2002) proposed a complete scheme to find out the initial values.</p></li>
+<li><p><strong>Parameters:</strong><br />
+<span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span>, <span class="math inline">\(\gamma\)</span>, <span class="math inline">\(\phi\)</span>. <br />
+Under the Guassian assumption of <span class="math inline">\(\varepsilon _t\)</span>, the parameters can be estimated by maximizing the loglikelihood function or minimizing the one-step Mean Square of Errors (MSE), <span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y_i})^2\)</span> and so on. The model selection method is using <span class="math inline">\(AIC = 2p + 2ln(L).\)</span> More information about AIC : <a href="http://robjhyndman.com/hyndsight/aic/">Facts and fallacies of the AIC</a>, <a href="https://en.wikipedia.org/wiki/Akaike_information_criterion">Wikipedia</a> <br /> <br /></p></li>
+<li><p><strong>Strengths and Weaknesses</strong></p>
+<ul>
+<li><strong>Strengths</strong>
+<ol style="list-style-type: decimal">
+<li>Can not only get point prediction but also interval prediction.</li>
+<li>No need to worry about initial values. Can use the scheme proposed by Hyndman (2002).</li>
+<li>The point estimator of Additive and Multiplicative models are identical but their prediction intervals are different.</li>
+</ol></li>
+<li><strong>Weaknesses</strong>
+<ol style="list-style-type: decimal">
+<li>The assumption of <span class="math inline">\(\varepsilon_t \sim NID(0,\sigma^2)\)</span> may not hold.</li>
+<li>Residuals may have autocorrelation.</li>
+<li>Can not add explanotary variables.</li>
+<li>The periods of multiseaonality should be nested.</li>
+<li>For high frequency seasonality, the parameter will be very large.</li>
+</ol></li>
+</ul></li>
+</ul></li>
+<li><p><strong><font size="4">Further Topics</font></strong> <br /></p>
+<ul>
+<li><strong>Multi-seasonality:</strong> <br />
+In the Chapter 14 of <a href="http://www.springer.com/gp/book/9783540719168">Forecasting with Exponential Smoothing: The State Space Approach (2008)</a>, Hyndman has talked about how to add multi-seasonality in the State Space Model.</li>
+</ul></li>
+</ul>
+</div>

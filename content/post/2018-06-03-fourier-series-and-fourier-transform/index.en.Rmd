@@ -1,0 +1,165 @@
+---
+title: Fourier Series and Fourier Transform
+author: Yin-Ting
+date: '2018-06-03'
+slug: fourier-series-and-fourier-transform
+aliases: 
+  - /posts/fourier-series-and-fourier-transform
+categories:
+  - Methodology
+tags:
+  - Time Series Analysis
+draft: no
+---
+
+* **<font size="4">References</font>** <br />
+    * [http://www.math.psu.edu/wysocki/M412/Notes412_8.pdf](http://www.math.psu.edu/wysocki/M412/Notes412_8.pdf)
+    * [https://zhuanlan.zhihu.com/p/19763358](https://zhuanlan.zhihu.com/p/19763358)
+    * [https://www.math.psu.edu/tseng/class/Math251/Notes-PDE%20pt2.pdf](https://www.math.psu.edu/tseng/class/Math251/Notes-PDE%20pt2.pdf)
+    * [http://www.oulu.fi/sites/default/files/content/files/series.pdf](http://www.oulu.fi/sites/default/files/content/files/series.pdf)
+    * [http://www.engr.uconn.edu/~lanbo/G377FFTYC.pdf](http://www.engr.uconn.edu/~lanbo/G377FFTYC.pdf)
+    
+<br />
+
+* **<font size="4">Fourier Series</font>**  <br />
+    * **Theorem** <br />
+    (references: [Second Order Linear Partial Differential Equations](https://www.math.psu.edu/tseng/class/Math251/Notes-PDE%20pt2.pdf), [复数形式傅立叶变换的物理意义，相位究竟指的是什么？](https://www.zhihu.com/question/20977844)) <br /> 
+    
+        $\text{Suppose } f(x) \text{ is a periodic function with period } T 
+        \text{ and is an integrable function on } [0, T]. \\
+        \text{Then, the  Fourier Series of } f(x) \text{ can be written as }$
+        
+        $$
+        \begin{align}
+        f(x) & = \frac{c_0}{2} + \sum_{n=1}^{\infty} c_ncos(n \cdot \frac{2\pi}{T} \cdot x  + \varphi_n) \\
+        &= \frac{c_0}{2} + \sum_{n=1}^{\infty} c_ncos(\varphi _n)cos(n \cdot \frac{2\pi}{T} \cdot x)+ (-c_n)sin(\varphi _n)sin(n \cdot \frac{2\pi}{T} \cdot x) \\
+        &\text{( let } a_0 = c_0, \;a_n = c_ncos(\varphi _n) \text{ and } b_n = (-c_n)sin(\varphi _n) \;) \\
+        &= \frac{a_0}{2} + \sum_{n=1}^{\infty} a_ncos(n \cdot \frac{2\pi}{T} \cdot x)+ b_nsin(n \cdot \frac{2\pi}{T} \cdot x) \\ 
+        \\
+        \text{where } c_n &= \sqrt{a_n^2 + b_n^2} = \sqrt{c_n^2(cos^2(\varphi _n) + sin^2(\varphi _n))} = \sqrt{c_n^2} \;\; (Amplitude)\\
+        \varphi_n &= tan^{-1}(-\frac{b_n}{a_n}) \;\; (Phase)\\
+        a_0 &= \frac{1}{T}\int_{0}^{T}f(x)dx \\
+        a_n &= \frac{1}{T}\int_{0}^{T}f(x) \cdot cos(n \cdot \frac{2\pi}{T} \cdot x)dx \\
+        b_n &= \frac{1}{T}\int_{0}^{T}f(x) \cdot sin(n \cdot \frac{2\pi}{T} \cdot x)dx
+        \end{align}
+        $$
+ 
+    * **Derivation for the Fourier Coefficients, $a_0$, $a_n$, $b_n$**: <br />
+      (references: [Khan - Fourier Series introduction](https://www.khanacademy.org/science/electrical-engineering/ee-signals/ee-fourier-series/v/ee-fourier-series-intro), [8 Fourier Series](http://www.math.psu.edu/wysocki/M412/Notes412_8.pdf)) <br>
+      Using the facts that  
+        $$
+        \begin{align}
+        \int_{0}^{2 \pi} sin(mx)dx &= 0\; , \forall \text{ integer } m \\
+        \int_{0}^{2 \pi} cos(mx)dx &= 0\; , \forall \text{ non-zero integer } m \\
+        \int_{0}^{2 \pi} sin(mx)cos(nx)dx &= 0\; , \forall \text{ integer } m \text{, } n\\
+        \int_{0}^{2 \pi} cos(mx)cos(nx)dx &= \left\{
+          \begin{matrix}
+          0\;, &\;\; m \neq n \\ 
+          2\pi\;, &\;\; m = n = 0\\
+          \pi\;, &\;\; m = n \neq 0  
+          \end{matrix}\right. \\
+        \int_{0}^{2 \pi} sin(mx)sin(nx)dx &= \left\{
+          \begin{matrix}
+          0 \;, &\;\; m \neq n\\ 
+          \pi \;, &\;\; m = n \neq0 
+          \end{matrix}\right.
+        \end{align}
+        $$
+      
+        to calculate   $\int_{0}^{2 \pi}f(x)dx$,   $\int_{0}^{2 \pi}f(x)cos(mx)dx$ and     $\int_{0}^{2 \pi}f(x)sin(mx)dx$. <br />
+        Then obtain the  Fourier Coefficients, 
+        
+        $$
+        \begin{align}
+        a_0 &= \frac{1}{\pi}\int_{0}^{2\pi}f(x)dx \\
+        a_n &= \frac{1}{\pi}\int_{0}^{2\pi}f(x) \cdot cos(n \cdot x)dx \\
+        b_n &= \frac{1}{\pi}\int_{0}^{2\pi}f(x) \cdot sin(n \cdot x)dx 
+        \end{align}
+        $$
+        
+        Let $x = \frac{2\pi}{T} \cdot y$ and $dx = \frac{2\pi}{T} \cdot dy$, <br />
+        then
+        
+        $$
+        \begin{align}
+        a_0 &= \frac{1}{T}\int_{0}^{T}f(x)dx \\
+        a_n &= \frac{1}{T}\int_{0}^{T}f(x) \cdot cos(n \cdot \frac{2\pi}{T} \cdot x)dx \\
+        b_n &= \frac{1}{T}\int_{0}^{T}f(x) \cdot sin(n \cdot \frac{2\pi}{T} \cdot x)dx
+        \end{align}
+        $$
+
+       * **Complex Form**: <br />
+            (references: [wiki-Euler's formula](https://en.wikipedia.org/wiki/Euler%27s_formula), [Complex Fourier Series](http://www.ee.ic.ac.uk/hp/staff/dmb/courses/E1Fourier/00300_ComplexFourier.pdf)) <br />
+            $f(x) = \sum_{n=-\infty}^{\infty}  d_ne^{i(n\frac{2\pi}{T}x)}$
+            
+            
+          By using Euler's formula, $e^{ix} = cos(x) + isin(x)$, we know
+          $$
+          \begin{align}
+          cos(x) &= \frac{e^{ix} + e^{-ix}}{2} \\
+          sin(x) &= \frac{e^{ix} - e^{-ix}}{2i} = \frac{-ie^{ix} + ie^{-ix}}{2}
+          \end{align}
+          $$
+          
+    
+        The $f(x)$ can be rewritten as, 
+        
+        $$
+        \begin{align}
+        f(x) &= \frac{a_0}{2} + \sum_{n=1}^{\infty} a_n(\frac{1}{2}e^{i(n\frac{2\pi}{T}x)} + \frac{1}{2}e^{-i(n\frac{2\pi}{T}x)}) + b_n(\frac{1}{2}ie^{i(n\frac{2\pi}{T}x)} - \frac{1}{2}ie^{-i(n\frac{2\pi}{T}x)}) \\
+        &= \frac{a_0}{2} + \sum_{n=1}^{\infty} \frac{(a_n - ib_n)}{2}e^{i(n\frac{2\pi}{T}x)} + \frac{(a_n + ib_n)}{2}e^{-i(n\frac{2\pi}{T}x)} \\
+        &= \sum_{n=-\infty}^{\infty}  d_ne^{i(n\frac{2\pi}{T}x)}
+        \end{align}
+        $$
+            
+         where the $d_n$ is called the Complex Fourier Coefficients, 
+         $$
+         \begin{align}
+         d_n = \left\{\begin{matrix}
+          \frac{a_n - ib_n}{2}&, \;\;\;n\geq 1\\ 
+          \frac{a_0}{2}&, \;\;\;n= 0\\ 
+          \frac{a_{\left | n \right |} + ib_{\left | n \right |}}{2}&, \;\;\;n\leq 1
+          \end{matrix}\right.
+         \end{align}
+         $$
+   
+   
+* **<font size="4">Fourier Transformation</font>** <br />
+  It is a process to convert a time function, $f(x)$ from time domain ($x$) to frequency domain ($n$). <br />
+  
+  Since we know that 
+      
+    $$
+    \begin{align}
+     \frac{1}{T}\int_{x = 0}^{T}e^{i(n\frac{2\pi}{T}x)}dx 
+     &= \frac{1}{T}\int_{x = 0}^{T}cos(n\frac{2\pi}{T}x) + isin(n\frac{2\pi}{T}x)dx \\ 
+     &= 
+     \left\{\begin{matrix}
+     0, \;\;\;n \neq 0\\
+     1, \;\;\;n = 0
+     \end{matrix}\right.
+    \end{align}
+    $$
+      
+  Then, we can get 
+      
+    $$
+    \begin{align}
+    \frac{1}{T}\int_{x = 0}^{T}e^{-i(n\frac{2\pi}{T}x)}f(x)dx 
+    &= \frac{1}{T}\int_{x = 0}^{T}e^{-i(n\frac{2\pi}{T}x)}\sum_{r=-\infty}^{\infty}  d_re^{i(r\frac{2\pi}{T}x)}dx \\
+    &= \sum_{r=-\infty}^{\infty}\int_{x = 0}^{T}d_re^{i(r-n)\frac{2\pi}{T}x}dx \\
+    &= d_n \\
+    &= \left\{\begin{matrix}
+        \frac{a_n - ib_n}{2}&, \;\;\;n\geq 1\\ 
+        \frac{a_0}{2}&, \;\;\;n= 0\\ 
+        \frac{a_{\left | n \right |} + ib_{\left | n \right |}}{2}&, \;\;\;n\leq 1
+        \end{matrix}\right.
+    \end{align}
+    $$
+      
+      
+    As we can see here, we have converted $f(x)$ from time domain ($x$) to the frequency domain ($n$). This process is called Fourier Transformation. Given a certain n, we know its $d_n$ which is composed of $a_n$ and $b_n$. By doing some calculation, we then get the $c_n$ and $\varphi_n$ which give us enough information to create a function to approach the orginal function $f(x)$.
+
+* **<font size="4">Examples in R</font>** <br />
+[http://www.di.fc.ul.pt/~jpn/r/fourier/fourier.html](http://www.di.fc.ul.pt/~jpn/r/fourier/fourier.html)
+

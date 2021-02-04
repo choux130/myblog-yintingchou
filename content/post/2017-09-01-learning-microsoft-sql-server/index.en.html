@@ -1,0 +1,222 @@
+---
+title: Learning Microsoft SQL Server
+author: Yin-Ting
+date: '2017-09-01'
+slug: learning-microsoft-sql-server
+aliases: 
+  - /posts/learning-microsoft-sql-server
+categories:
+  - Others
+tags:
+  - Database
+draft: no
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>This page is about the SQL Server commands. All of the contents are based on the code in <a href="https://www.w3schools.com/SQL/deFault.asp">w3schools - SQL</a> with the sample database, <a href="http://www.zentut.com/sql-tutorial/sql-sample-database/">Northwind</a>. To make myself easier to look up the commands I want in the future, I picked out the ones I have been used a lot in my work and add some notes on it. I also borrowed some materials from the course <a href="https://www.linkedin.com/learning/microsoft-sql-server-2016-query-data/using-the-exercise-files">LinkdedIn Learning - Microsoft SQL Server 2016: Query Data</a>. The lecturer of this course, <a href="https://www.linkedin.com/in/gerryob/">Gerry O’Brien</a>, did a great job on teaching this course and provided me a terrific starting point on learning Microsoft SQL Server. If you are interested in the complete commands taught in the course. Please check out, <a href="%7B%7B%20site.baseurl%20%7D%7D/DATA/Ex_Files_QueryingSQL2016">Exercise Folder of the course</a>. All the example codes can be executed on <a href="https://www.w3schools.com/sql/trysql.asp?filename=trysql_select_all">w3schools - SQL Try it Editor</a> or test the code on the <a href="http://www.sqlfiddle.com/">SQL Fiddle</a> by creating new tables by ourselves.</p>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><strong><font size="4">References</font></strong> <br />
+<ol style="list-style-type: decimal">
+<li><a href="https://www.linkedin.com/learning/microsoft-sql-server-2016-query-data/using-the-exercise-files">LinkdedIn Learning - Microsoft SQL Server 2016: Query Data</a></li>
+<li><a href="%7B%7B%20site.baseurl%20%7D%7D/DATA/Ex_Files_QueryingSQL2016">Exercise Folder of the course</a></li>
+<li><a href="https://docs.microsoft.com/en-us/sql/t-sql/language-reference">Transact-SQL Reference (Database Engine)</a></li>
+<li><a href="https://www.w3schools.com/SQL/deFault.asp">w3schools - SQL</a></li>
+<li><a href="http://www.sqlfiddle.com/">SQL Fiddle</a></li>
+<li><a href="http://www.zentut.com/sql-tutorial/">zentut - SQL Tutorial</a></li>
+</ol></li>
+<li><strong><font size="4">Example Database : <em>Northwind</em></font></strong> <br />
+<ul>
+<li><a href="http://dbdesc.com/output_samples/htmlbrowse_northwind.html">Northwind database documentation - dbdesc</a></li>
+<li><a href="http://www.zentut.com/wp-content/uploads/downloads/2013/06/Northwind-Sample-Database-Diagram.pdf">Entity Relationship Diagram (ERD)</a> <br />
+<a href = "/posts/2017-09-01-learning-microsoft-sql-server/ERD.png">
+<img src="/posts/2017-09-01-learning-microsoft-sql-server/ERD.png" style="width:600px" class="center"/></a></li>
+</ul></li>
+<li><strong><font size="4">Common SQL Server Commands</font></strong> <br />
+<ul>
+<li><p><strong>Data Overview</strong> (<code>SELECT</code>, <code>TOP</code>, <code>DISTINCT</code>, <code>ORDER BY</code>, <code>GROUP BY</code>, <code>COUNT()</code>, <code>AVG()</code>)</p>
+<pre><code>SELECT TOP 3 *
+FROM Customers</code></pre>
+<pre class="sql"><code>SELECT DISTINCT Country
+FROM Customers</code></pre>
+<pre class="sql"><code>SELECT COUNT(*) AS Total
+FROM Customers</code></pre>
+<pre class="sql"><code>SELECT * FROM Customers
+ORDER BY country DESC, city</code></pre>
+<pre class="sql"><code>SELECT country, city, count(*) AS Total_by_country_city
+FROM Customers
+GROUP BY country, city</code></pre>
+<pre class="sql"><code>SELECT ProductID, AVG(Quantity) AS AVG_Qty
+FROM OrderDetails
+GROUP BY ProductID</code></pre></li>
+<li><p><strong>Subset Data with conditions</strong> (<code>WHERE</code>, <code>IN</code>, <code>&lt;&gt;</code>, <code>IS NULL</code>, …)</p>
+<pre class="sql"><code>SELECT * FROM Customers
+WHERE Country IN (&#39;UK&#39;, &#39;USA&#39;)
+    AND Country IS NOT NULL</code></pre>
+<pre class="sql"><code>SELECT * FROM OrderDetails
+WHERE Quantity &gt; 20</code></pre></li>
+<li><p><strong>Subquery</strong> (<code>SELECT</code> in <code>WHERE</code>)</p>
+<pre class="sql"><code>SELECT * FROM OrderDetails
+WHERE OrderID =
+(
+    SELECT OrderID FROM Orders
+    WHERE OrderDate &gt; &#39;1996-07-04&#39;
+)</code></pre>
+<pre class="sql"><code>-- Correlated subquery, have to use table alias
+SELECT * FROM OrderDetails o1
+WHERE Quantity =
+(
+    SELECT MAX(Quantity) FROM OrderDetails o2
+    WHERE o1.ProductID = o2.ProductID
+)</code></pre></li>
+<li><p><strong>Common Table Expression (CTE)</strong> (<code>WITH</code>) <br />
+<span>It is a temporary table saved only in memory and can be referred in the later query.</span></p>
+<pre class="sql"><code>-- Need to run whole code in one time
+WITH temp_tab AS
+(
+   SELECT * FROM OrderDetails o1
+   WHERE Quantity =
+   (
+       SELECT MAX(Quantity) FROM OrderDetails o2
+       WHERE o1.ProductID = o2.ProductID
+   )
+ )
+ SELECT * FROM temp_tab
+ ORDER BY Quantity</code></pre></li>
+<li><p><strong>Create New Columns from Other Columns</strong> (<code>CASE</code>) <br />
+<span> It is how <em>if and then</em> logic works in SQL Server. </span></p>
+<pre class="sql"><code>SELECT ShipperID, Phone,
+CASE ShipperName
+   WHEN &#39;Speedy Express&#39; THEN &#39;SE&#39;
+   WHEN &#39;United Package&#39; THEN &#39;UP&#39;
+   WHEN &#39;Federal Shipping&#39; THEN &#39;FS&#39;
+END AS shippername_short
+FROM Shippers</code></pre>
+<pre class="sql"><code>SELECT *,
+CASE
+     WHEN BirthDate &lt; &#39;1960-01-01&#39; THEN &#39;Senior&#39;
+     ELSE &#39;Not Senior&#39;
+END AS age_category
+FROM Employees</code></pre></li>
+<li><p><strong>Join Multiple tables through Columns</strong> (<code>INNER JOIN</code>, <code>LEFT JOIN</code>, <code>RIGHT JOIN</code>, <code>FULL JOIN</code>, …)</p>
+<pre class="sql"><code>SELECT Orders.OrderID, Customers.CustomerName, Shippers.ShipperName
+FROM ((Orders
+    INNER JOIN Customers ON Orders.CustomerID = Customers.CustomerID)
+    INNER JOIN Shippers ON Orders.ShipperID = Shippers.ShipperID)</code></pre>
+<pre class="sql"><code>SELECT A.CustomerName AS CustomerName1, B.CustomerName AS CustomerName2, A.City
+FROM Customers A, Customers B
+WHERE A.CustomerID &lt;&gt; B.CustomerID
+    AND A.City = B.City
+ORDER BY A.City</code></pre>
+<p><a href = "/posts/2017-09-01-learning-microsoft-sql-server/sql_join_1.png">
+<img src="/posts/2017-09-01-learning-microsoft-sql-server/sql_join_1.png" style="width:600px" class="center"/></a>
+<a href = "/posts/2017-09-01-learning-microsoft-sql-server/sql_join_2.png">
+<img src="/posts/2017-09-01-learning-microsoft-sql-server/sql_join_2.png" style="width:400px" class="center" /></a></p>
+<p><span>The above images are from <a href = "https://stackoverflow.com/questions/406294/left-join-vs-left-outer-join-in-sql-server">here</a> and <a href = "https://stackoverflow.com/questions/30358982/sql-server-replaces-left-join-for-left-outer-join-in-view-query">here</a>.</span></p></li>
+<li><p><strong>Combine Rows from Multiple Tables</strong> (<code>UNION</code>, <code>INTERSECT</code>, <code>EXCEPT</code>)</p>
+<pre class="sql"><code>-- only return distinct values
+SELECT City FROM Customers
+UNION
+SELECT City FROM Suppliers
+ORDER BY City</code></pre>
+<pre class="sql"><code>-- return duplicated values
+SELECT City FROM Customers
+UNION
+SELECT City FROM Suppliers
+ORDER BY City</code></pre>
+<p><a href = "/posts/2017-09-01-learning-microsoft-sql-server/union.png">
+<img src="/posts/2017-09-01-learning-microsoft-sql-server/union.png" style="width:400px" class="center" /></a>
+<span>The above image is from <a href = "http://csharp-video-tutorials.blogspot.com/2015/09/difference-between-union-intersect-and.html">here</a>.</span></p></li>
+<li><p><strong>Table Transformation. From Long to Wide or from Wide to Long</strong> (<code>PIVOT</code>, <code>UNPIVOT</code>) <br />
+<a href="http://www.sqlfiddle.com/#!6/3e694c/10">Example code in SQL Fiddle - PIVOT</a> <br />
+<a href="http://www.sqlfiddle.com/#!6/2b0df/1">Example code in SQL Fiddle - UNPIVOT</a></p>
+<pre><code>CREATE TABLE un_tab
+([Name] varchar(7), [Subject] varchar(7), [Grade] numeric(10,5))
+
+INSERT INTO un_tab
+    ([Name], [Subject], [Grade])
+VALUES
+(&#39;Andy&#39;, &#39;Math&#39;, 60),
+(&#39;Andy&#39;, &#39;Science&#39;, 70),
+(&#39;Andy&#39;, &#39;English&#39;, 80),
+(&#39;Judy&#39;, &#39;Math&#39;, 20),
+(&#39;Judy&#39;, &#39;Science&#39;, 80),
+(&#39;Judy&#39;, &#39;English&#39;, 100),
+(&#39;Joe&#39;, &#39;Math&#39;, 90),
+(&#39;Joe&#39;, &#39;Science&#39;, 70),
+(&#39;Joe&#39;, &#39;English&#39;, 90)
+
+SELECT *
+FROM un_tab
+PIVOT
+(
+    min(Grade)
+    FOR Subject IN ([Math], [Science], [English])
+) AS tab</code></pre>
+<pre class="sql"><code>CREATE TABLE tab
+     ([Name] varchar(7), [Math] numeric(10,5), [Science] numeric(10,5), [English] numeric(10,5))
+
+INSERT INTO tab
+     ([Name], [Math], [Science], [English])
+VALUES
+     (&#39;Andy&#39;, 60, 70, 80),
+     (&#39;Judy&#39;, 20, 80, 100),
+     (&#39;Joe&#39;, 90, 70, 90)
+
+SELECT Name, Subject, Grade
+FROM tab
+UNPIVOT
+(
+    Grade
+    FOR Subject IN (Math, Science, English)
+) AS un_tab</code></pre></li>
+<li><p><strong>Add new rows to a table using <code>IF</code> to avoid duplication</strong> (<code>EXIST</code>, <code>IF</code>, <code>BEGIN</code>, <code>END</code>)
+<a href="http://www.sqlfiddle.com/#!6/f1c52/30">Example code in SQL Fiddle - EXISTS</a></p>
+<pre class="sql"><code>CREATE TABLE tab
+    ([Name] varchar(7), [Math] numeric(10,5), [Science] numeric(10,5), [English] numeric(10,5))
+
+INSERT INTO tab
+    ([Name], [Math], [Science], [English])
+VALUES
+    (&#39;Andy&#39;, 60, 70, 80),
+    (&#39;Judy&#39;, 20, 80, 100),
+    (&#39;Joe&#39;, 90, 70, 90)
+
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM tab
+    WHERE Name = &#39;Andy&#39;
+)
+BEGIN
+    INSERT INTO tab
+    ( Name, Math, Science, English)
+VALUES (&#39;Andy&#39;, 60, 70, 80)
+END</code></pre></li>
+<li><p><strong>Stored Procedures</strong> (’ @ ’) <br />
+It is like define a function for future uses. <br />
+<a href="http://www.sqlfiddle.com/#!6/a93e2/16">Example code in SQL Fiddle - @</a></p>
+<pre class="sql"><code>CREATE TABLE tab
+    ([Name] varchar(7), [Math] numeric(10,5), [Science] numeric(10,5), [English] numeric(10,5))
+
+INSERT INTO tab
+    ([Name], [Math], [Science], [English])
+VALUES
+    (&#39;Andy&#39;, 60, 70, 80),
+    (&#39;Judy&#39;, 20, 80, 100),
+    (&#39;Joe&#39;, 90, 70, 90)
+
+CREATE PROCEDURE pp @Name nvarchar(50)
+AS
+BEGIN
+    SELECT * FROM tab
+    WHERE Name = @Name
+END;
+
+EXEC pp @Name = &#39;Andy&#39;;</code></pre></li>
+</ul></li>
+</ul>
+</div>

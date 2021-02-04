@@ -1,0 +1,97 @@
+---
+title: BATS and TBATS Model
+author: Yin-Ting
+date: '2017-05-03'
+slug: bats-and-tbats-model
+aliases: 
+  - /posts/bats-and-tbats-model/
+categories:
+  - Methodology
+tags:
+  - Time Series Analysis
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>BATS model is <strong><a href="/posts/exponential-smoothing/">Exponential Smoothing Method</a> + Box-Cox Transformation + ARMA model for residuals</strong>. The Box-Cox Transformation here is for dealing with non-linear data and ARMA model for residuals can de-correlated the time series data. Alysha M.(2010) has proved that BATS model can improve the prediction performance compared to the simple Sate Space Model. However, BATS model does not do well when the the seaonality is complex and high frequency. So, Alysha M.(2011) propsed TBATS model which is <strong>BATS model + Trigonometric Seasonal</strong>. The trigonometric expression of seasonality terms can not only dramatically reduced the parameters of model when the frequencies of seaonalities are high but also give the model more flexibility to deal with complex seasonality. In a nutshell, this is how the story goes: <a href="/posts/posts/exponential-smoothing/">Exponential Smoothing Method</a> <span class="math inline">\(\Rightarrow\)</span> <a href="/posts/state-space-model-for-exponential-smoothing/">State Space Model</a> <span class="math inline">\(\Rightarrow\)</span> BATS <span class="math inline">\(\Rightarrow\)</span> TBATS.</p>
+<p>This post is my note about learning BATS and TBATS models. All the contents in this post are based on my reading on many resources which are listed in the References part.</p>
+<div id="references" class="section level3">
+<h3>References</h3>
+<ul>
+<li><strong>Paper</strong>
+<ol style="list-style-type: decimal">
+<li>De Livera, Alysha M. “Automatic forecasting with a modified exponential smoothing state space framework.” Monash Econometrics and Business Statistics Working Papers 10, no. 10 (2010).</li>
+<li>De Livera, Alysha M., Rob J. Hyndman, and Ralph D. Snyder. “Forecasting time series with complex seasonal patterns using exponential smoothing.” Journal of the American Statistical Association 106, no. 496 (2011): 1513-1527.</li>
+</ol></li>
+<li><strong>Books</strong>
+<ul>
+<li><a href="http://www.springer.com/gp/book/9783540719168">Forecasting with Exponential Smoothing: The State Space Approach (2008)</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><strong><font size="4">BATS (Box-Cox Transformation, ARMA residuals, Trend and Seasonality)</font></strong> <br />
+<ul>
+<li><p><strong>Algorithm</strong> <br />
+<img src="/posts/2017-05-03-bats-and-tbats-model/bats.png" style="width:300px" class="center"/></p>
+<p><span class="math inline">\(\varepsilon_t \sim NID(0,\sigma^2),\)</span> where <span class="math inline">\(i = \text{the } ith \text{ seasonality}.\)</span> If it is double seasonality then <span class="math inline">\(i = 1, 2.\)</span></p></li>
+<li><p><strong>Initial Values:</strong><br />
+The inital values are <span class="math inline">\(l_0\)</span>, <span class="math inline">\(b_0\)</span>, <span class="math inline">\(\{s_0^1, s_0^2, ...s_0^{m_1}\}\)</span>, <span class="math inline">\(\{s_0^1, s_0^2, ...s_0^{m_2}\}\)</span>, …<span class="math inline">\(\{s_0^1, s_0^2, ...s_0^{m_k}\}\)</span>. The <span class="math inline">\(k\)</span> here is the total number of seasonality. Alysha M.(2010) has a thorough explanation about finding initial values for different cases in her paper. <br /></p></li>
+<li><p><strong>Parameters:</strong><br />
+<span class="math inline">\(\omega,\;\phi,\;\alpha,\;\beta,\;\gamma_1,\cdots,\gamma_k,\;\varphi_1,\cdots,\varphi_p\;,\theta_1,\cdots,\theta_q.\)</span>
+<br />
+Under the Guassian assumption of <span class="math inline">\(\varepsilon _t\)</span>, the parameters can be estimated by maximizing the loglikelihood function or minimizing the Mean Square of Errors (MSE), <span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y_i})^2\)</span> and so on. The <span class="math inline">\(p,\;q\)</span> here can be <span class="math inline">\(0,\;1,\;2,3\;,4,\;5\)</span>. Choose the one by minimizing the <span class="math inline">\(AIC = 2p + 2ln(L)\)</span>. More information about AIC : <a href="http://robjhyndman.com/hyndsight/aic/">Facts and fallacies of the AIC</a>, <a href="https://en.wikipedia.org/wiki/Akaike_information_criterion">Wikipedia</a> <br /></p></li>
+<li><p><strong>Strengths and Weaknesses</strong></p>
+<ul>
+<li><strong>Strengths</strong>
+<ol style="list-style-type: decimal">
+<li>Box-cox transformation can deal with data with non-linearity and then somewhat makes the variance becomes constant.</li>
+<li>ARMA model on residuals can solve autocorrelation problem.</li>
+<li>No need to worry about initial values.</li>
+<li>Can get not only point prediction but also interval prediction.</li>
+<li>The performance is better than simple state space model.</li>
+</ol></li>
+<li><strong>Weaknesses</strong>
+<ol style="list-style-type: decimal">
+<li>The assumption of <span class="math inline">\(\varepsilon_t \sim NID(0,\sigma^2)\)</span> may not hold.</li>
+<li>Can not add explanotary variables.</li>
+<li>The periods of multiseaonality should be nested.</li>
+<li>For high frequency seasonality, the parameter will be very large.</li>
+</ol></li>
+</ul></li>
+</ul></li>
+</ul>
+<ul>
+<li><strong><font size="4">TBATS (Trigonometric Seasonal, Box-Cox Transformation, ARMA residuals, Trend and Seasonality)</font></strong> <br />
+<ul>
+<li><p><strong>Algorithm:</strong><br />
+<img src="/posts/2017-05-03-bats-and-tbats-model/tbats1.png" style="width:300px" class="center"/>
+<img src="/posts/2017-05-03-bats-and-tbats-model/tbats2.png" style="width:300px" class="center"/>
+<span class="math display">\[\varepsilon_t \sim NID(0,\sigma^2),\]</span> where <span class="math inline">\(i = \text{the } ith \text{ seasonality}.\)</span> If it is double seasonality then <span class="math inline">\(i = 1, 2.\)</span></p></li>
+<li><p><strong>Initial Values:</strong><br />
+<a href="#ref">Alysha M.(2011)</a> has a thorough explanation about finding initial values after using trigonometric expression to seasonality.<br /></p></li>
+<li><p><strong>Parameters:</strong><br />
+<span class="math inline">\(\omega,\;\phi,\;\alpha,\;\beta,\;\gamma_1,\cdots,\gamma_k,\;\varphi_1,\cdots,\varphi_p\;,\theta_1,\cdots,\theta_q.\)</span> <br />
+The method to estimate the parameters are similar to the above <a href="#bats_para">BATS model</a> <br /></p></li>
+<li><p><strong>Strengths and Weaknesses</strong></p>
+<ul>
+<li><strong>Strengths</strong>
+<ol style="list-style-type: decimal">
+<li>Can deal with data with non-integer seasonal period, non-nested periods and high frequency data.</li>
+<li>Can do multi-seasonality without increasing too much parameters.</li>
+<li>All the <a href="#strweak1">strengths that BATS has</a>.</li>
+</ol></li>
+<li><strong>Weaknesses</strong>
+<ol style="list-style-type: decimal">
+<li>The assumption of <span class="math inline">\(\varepsilon_t \sim NID(0,\sigma^2)\)</span> may not hold.</li>
+<li>Can not add explanotary variables.</li>
+<li>The performance for long-term prediction is not very well.</li>
+<li>The computation cost is big if the data size is large.</li>
+</ol></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>

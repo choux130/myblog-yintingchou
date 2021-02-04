@@ -1,0 +1,53 @@
+---
+title: Running SQL Server on Mac using Docker
+author: Yin-Ting
+date: '2019-04-07'
+slug: docker-sql-server
+aliases: 
+  - /posts/docker-sql-server
+categories:
+  - Others
+tags:
+  - SQL Server
+  - Docker
+  - Azure Data Studio
+draft: no
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>It is time to practice T-SQL but how can I do that with my Macbook Pro? Thanks to <a href="https://www.docker.com/">Docker</a>, it is never mission impossible.</p>
+<ul>
+<li><strong><font size="4">References</font></strong> <br />
+<ul>
+<li><a href="https://dbafromthecold.com/2018/09/25/running-sql-server-2019-ctp-in-a-docker-container/">Running SQL Server 2019 CTP in a Docker container – DBA From The Cold</a></li>
+<li><a href="https://www.sqlpassion.at/archive/2018/11/19/running-sql-server-with-docker-on-the-mac/">Running SQL Server with Docker on the Mac – SQL passion</a></li>
+</ul></li>
+</ul>
+<ul>
+<li><strong><font size="4">Steps</font></strong> <br />
+<ol style="list-style-type: decimal">
+<li><p>Follow the <a href="https://dbafromthecold.com/2018/09/25/running-sql-server-2019-ctp-in-a-docker-container/">post</a> to install docker and create a container with SQL Server 2019 CTP.
+<iframe id="inlineFrameExample" width="750" height="500" src="https://dbafromthecold.com/2018/09/25/running-sql-server-2019-ctp-in-a-docker-container/">
+</iframe></p></li>
+<li><p>Install <a href="https://docs.microsoft.com/en-us/sql/azure-data-studio/download?view=sql-server-2017">Azure Data Studio</a> and read the <a href="https://www.sqlpassion.at/archive/2018/11/19/running-sql-server-with-docker-on-the-mac/">post</a>
+<iframe id="inlineFrameExample" width="750" height="500" src="https://www.sqlpassion.at/archive/2018/11/19/running-sql-server-with-docker-on-the-mac/">
+</iframe></p></li>
+<li><p>Download <a href="https://github.com/Microsoft/sql-server-samples/releases/tag/wide-world-importers-v1.0">Wide World Importers sample database</a> (WideWorldImporters-Full.bak) and change the code on the post to the following code to restore Wide World Importers sample database to the docker container</p>
+<pre class="sql"><code>RESTORE FILELISTONLY FROM DISK = &#39;/var/backups/WideWorldImporters-Full.bak&#39;
+GO
+
+RESTORE DATABASE WideWorldImporters FROM DISK = &#39;/var/backups/WideWorldImporters-Full.bak&#39; 
+WITH 
+MOVE &#39;WWI_Primary&#39; TO &#39;/var/opt/mssql/data/WideWorldImporters.mdf&#39;,
+MOVE &#39;WWI_UserData&#39; TO &#39;/var/opt/mssql/data/WideWorldImporters_UserData.ndf&#39;,
+MOVE &#39;WWI_Log&#39; TO &#39;/var/opt/mssql/data/WideWorldImporters.ldf&#39;,
+MOVE &#39;WWI_InMemory_Data_1&#39; TO &#39;/var/opt/mssql/data/WideWorldImporters_InMemory_Data_1&#39;
+GO</code></pre>
+<p><a href="/post/2019-04-07-running-sql-server-on-Mac-using-docker/AzureDataStudio_1.png"><img src="/post/2019-04-07-running-sql-server-on-Mac-using-docker/AzureDataStudio_1.png" class="center" style="width:700px"></a></p></li>
+<li><p>Then, It works! If we want to see the files in the container, we can install <a href="https://kitematic.com/">Kitematic</a> to talk to the container with command.</p>
+<p><a href="/post/2019-04-07-running-sql-server-on-Mac-using-docker/AzureDataStudio_2.png"><img src="/post/2019-04-07-running-sql-server-on-Mac-using-docker/AzureDataStudio_2.png" class="center" style="width:700px"></a></p>
+<p><a href="/post/2019-04-07-running-sql-server-on-Mac-using-docker/Kitematic.png"><img src="/post/2019-04-07-running-sql-server-on-Mac-using-docker/Kitematic.png" style="width:700px" class="center"></a></p></li>
+</ol></li>
+</ul>

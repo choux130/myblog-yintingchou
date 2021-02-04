@@ -1,0 +1,60 @@
+---
+title: Connect SQL Server Database to R
+author: Yin-Ting
+date: '2017-10-15'
+slug: connect-sql-server-database-to-r
+aliases: 
+  - /posts/connect-sql-server-database-to-r
+categories:
+  - R
+tags:
+  - Deploy
+draft: no
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>When I am working on my personal projects, all the data I have can be easily saved as <code>.csv</code> or <code>.txt</code> files. Things are not complicated. However, when things are in scale, it is hard to not to talk about database. In my company, all the data are stored in SQL Server database. So, it is important for me to know how to connect R with SQL Server. And, also good to know how to interact with database in R by passing variables in R environment to database and then return the desired dataset. This is especially useful when I plan to do R Shiny application with database connected.</p>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><strong><font size="4">References</font></strong> <br />
+<ol style="list-style-type: decimal">
+<li><a href="https://cran.r-project.org/web/packages/RODBC/RODBC.pdf">Package ‘RODBC’</a></li>
+<li><a href="https://cran.r-project.org/web/packages/RODBCext/RODBCext.pdf">Package ‘RODBCext’</a></li>
+</ol></li>
+</ul>
+<ul>
+<li><p><strong><font size="4">Pull data from database</font></strong> <br />
+For the <code>sql_file.sql</code>, try to avoid comments. Based on experience, it is easily to get errors because of that.</p>
+<pre class="r"><code>#### Import Libraries ####
+if (!require(&quot;RODBC&quot;)) install.packages(&quot;RODBC&quot;,repos = &quot;http://cran.us.r-project.org&quot;)
+library(RODBC)
+
+#### Get the Product list ####
+conn = odbcDriverConnect(&#39;driver={SQL Server};server=server-name;database=database-name;trusted_connection = true&#39;)
+sqlcode = paste(readLines(&#39;path/to/the/sql_file.sql&#39;), collapse=&#39;\n&#39;)
+# or, 
+# sqlcode = &quot;SELECT TOP 10 * FROM table_name&quot;
+
+df = sqlQuery(conn, sqlcode) 
+
+close(conn) # close the connection</code></pre></li>
+<li><p><strong><font size="4">Pass input in R to database</font></strong> <br /></p>
+<pre class="r"><code>#### Import Libraries ####
+if (!require(&quot;RODBC&quot;)) install.packages(&quot;RODBC&quot;,repos = &quot;http://cran.us.r-project.org&quot;)
+if (!require(&quot;RODBCext&quot;)) install.packages(&quot;RODBC&quot;,repos = &quot;http://cran.us.r-project.org&quot;)
+
+#### Get the Product list ####
+conn = odbcDriverConnect(&#39;driver={SQL Server};server=server-name;database=database-name;trusted_connection = true&#39;)
+sqlcode = paste(readLines(&#39;path/to/the/sql_file.sql&#39;), collapse=&#39;\n&#39;)
+# or, 
+# sqlcode = &quot;SELECT TOP (?) * FROM table_name &quot;
+df = sqlExecute(channel = conn, 
+                      query = sqlcode,
+                      data = data.frame(as.integer(num_prod_each)),
+                      fetch = TRUE,
+                      stringsAsFactors = FALSE)</code></pre></li>
+</ul>
+</div>

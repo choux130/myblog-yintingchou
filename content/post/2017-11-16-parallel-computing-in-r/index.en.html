@@ -1,0 +1,86 @@
+---
+title: Parallel Computing in R
+author: Yin-Ting
+date: '2017-11-16'
+slug: parallel-computing-in-r
+aliases: 
+  - /posts/parallel-computing-in-r
+categories:
+  - R
+tags: 
+  - Deploy
+draft: no
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>In my work, I usually deal with dataset of products from different customers across different market places. Basically, each product has its own time series dataset. The size of each dataset is not big but we have millions of them. Before finding any convincing reasons to combine dataset from different products, now we just treat them all as independent dataset. And, since they are all independent, it is definitely a good idea to use parallel computing to push the limit of our machine and to make code executed efficiently. This post is a lite version about how I do parallel computing in R.</p>
+<div id="details" class="section level3">
+<h3>Details</h3>
+<ul>
+<li><p><strong><font size="4">References</font></strong> <br /></p>
+<ol style="list-style-type: decimal">
+<li><a href="https://cran.r-project.org/web/packages/doParallel/vignettes/gettingstartedParallel.pdf">Getting Started with doParallel and foreach</a></li>
+<li><a href="https://cran.r-project.org/web/packages/foreach/vignettes/foreach.pdf">Using The foreach Package</a></li>
+<li><a href="http://blog.revolutionanalytics.com/2015/02/monitoring-progress-of-a-foreach-parallel-job.html">Monitoring progress of a foreach parallel job</a></li>
+<li><a href="https://cran.r-project.org/web/packages/foreach/foreach.pdf">Package ‘foreach’</a></li>
+<li><a href="https://cran.r-project.org/web/packages/doParallel/doParallel.pdf">Package ‘doParallel’</a></li>
+<li><a href="https://cran.r-project.org/web/packages/doSNOW/doSNOW.pdf">Package ‘doSNOW’</a></li>
+</ol></li>
+<li><p><strong><font size="4">Run in Parallel</font></strong> <br /></p>
+<pre class="r"><code>#### Import Libraries ####
+.packages = c(&quot;foreach&quot;,&quot;doParallel&quot;, &quot;doSNOW&quot;)
+.inst &lt;- .packages %in% installed.packages()
+if(length(.packages[!.inst]) &gt; 0) install.packages(.packages[!.inst], repos = &quot;http://cran.us.r-project.org&quot;)
+notshow = lapply(.packages, require, character.only=TRUE)
+
+#### Define the function ####
+CreateDataFrame = function(value, times){
+  d = rep(value, times = times)
+  return(d)
+}
+
+#### Run Parallelly ####
+num_core = detectCores() - 2 # detect # of CPU cores 
+cl = makeCluster(num_core, outfile = &quot;&quot;) # define the clusters
+registerDoSNOW(cl)
+
+# print out the progress for every iteration
+progress &lt;- function(n) cat(sprintf(&quot;task %d is complete\n&quot;, n))
+opts &lt;- list(progress=progress)
+
+start.time = proc.time() # calculate the execution time
+output_par = 
+  foreach(i = 1:5, .options.snow = opts, .errorhandling = &#39;pass&#39;) %dopar% 
+  # the default .combine = list 
+  {
+    out = CreateDataFrame(c(1:i), 3)
+    out
+  }</code></pre>
+<pre><code>## task 1 is complete
+## task 2 is complete
+## task 3 is complete
+## task 4 is complete
+## task 5 is complete</code></pre>
+<pre class="r"><code>stopCluster(cl) # stop the cluster in the end
+(end.time = proc.time() - start.time) # total execution time</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.037   0.003   0.058</code></pre>
+<pre class="r"><code>output_par</code></pre>
+<pre><code>## [[1]]
+## [1] 1 1 1
+## 
+## [[2]]
+## [1] 1 2 1 2 1 2
+## 
+## [[3]]
+## [1] 1 2 3 1 2 3 1 2 3
+## 
+## [[4]]
+##  [1] 1 2 3 4 1 2 3 4 1 2 3 4
+## 
+## [[5]]
+##  [1] 1 2 3 4 5 1 2 3 4 5 1 2 3 4 5</code></pre></li>
+</ul>
+</div>
