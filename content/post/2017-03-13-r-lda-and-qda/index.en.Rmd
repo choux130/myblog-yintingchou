@@ -3,6 +3,8 @@ title: R --- LDA and QDA
 author: Yin-Ting
 date: '2017-03-13'
 slug: r-lda-and-qda
+aliases: 
+  - /posts/r-lda-and-qda/
 categories: 
   - R
 tags:

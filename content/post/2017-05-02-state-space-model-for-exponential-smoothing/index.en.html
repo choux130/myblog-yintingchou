@@ -3,13 +3,14 @@ title: State Space Model for Exponential Smoothing
 author: Yin-Ting
 date: '2017-05-02'
 slug: state-space-model-for-exponential-smoothing
+aliases: 
+  - /posts/state-space-model-for-exponential-smoothing/
 categories:
   - Methodology
 tags:
   - Time Series Analysis
 ---
 
-<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
 
 
 <p>The main weakness of original <a href="/posts/exponential-smoothing">Exponential Smoothing Method</a> is that it can only provide point estimation. Hyndman (2002) proposed using state space framework to rewrite the original exponential smoothing algorithm and then give distribution assumption on the error terms to calculate the prediction interval. There are two types of error terms in the state space model: Additive and Multiplicative. The point estimator for these two models are the same but the prediction intervals are different.</p>

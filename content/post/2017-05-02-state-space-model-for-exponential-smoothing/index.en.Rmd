@@ -3,6 +3,8 @@ title: State Space Model for Exponential Smoothing
 author: Yin-Ting
 date: '2017-05-02'
 slug: state-space-model-for-exponential-smoothing
+aliases: 
+  - /posts/state-space-model-for-exponential-smoothing/
 categories:
   - Methodology
 tags:
