@@ -16,6 +16,7 @@ outputs:
   section:
     - JSON
     - HTML
+disqusshortname: "yintingchou-com"
 params:
   favicon: favicon.ico
   logo:

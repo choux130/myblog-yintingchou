@@ -13,7 +13,6 @@ tags:
 draft: no
 ---
 
-<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
 
 
 <p><span style="color: darkred">
@@ -81,8 +80,7 @@ stop_words = stop_words.get_stop_words(&#39;english&#39;) # list out all the Eng
 <ul>
 <li><p><i>Job Type</i> <br />
 <span>The first <code>type_lower</code> are the exact wording showing in the pages (when searching all the words will be in lower cases). It will be mapped to the updated <code>type</code> by using dictionary, and then be shown in the cell of the <code>.csv</code> file. The purpose for the mapping is mainly for wording consistency which is important to my future text analysis project, the similarity between all jobs using <a href="https://janav.wordpress.com/2013/10/27/tf-idf-and-cosine-similarity/">Term Frequency and Inverse Document Frequency (TF - IDF)</a>. </span></p>
-<pre><code>```python
-####################################################
+<pre class="python"><code>####################################################
 ##### DEFINE THE TERMS THAT I AM INTERESTED IN #####
 ####################################################
 
@@ -94,12 +92,10 @@ type_lower = [s.lower() for s in type] # lowercases, the exact wording
 type_map = pandas.DataFrame({&#39;raw&#39;:type, &#39;lower&#39;:type_lower}) # create a dataframe
 type_map[&#39;raw&#39;] = [&quot;Full-Time&quot;, &quot;Full-Time&quot;, &#39;Part-Time&#39;, &#39;Part-Time&#39;, &quot;Contract&quot;, &#39;Contract&#39;] # modify the mapping
 type_dic = list(type_map.set_index(&#39;lower&#39;).to_dict().values()).pop() # use the dataframe to create a dictionary
-#print(type_dic)
-```
-
-&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;{&#39;full-time&#39;: &#39;Full-Time&#39;, &#39;full time&#39;: &#39;Full-Time&#39;,
-&#39;part-time&#39;: &#39;Part-Time&#39;, &#39;part time&#39;: &#39;Part-Time&#39;,
-&#39;contract&#39;: &#39;Contract&#39;, &#39;contractor&#39;: &#39;Contract&#39;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;</code></pre></li>
+#print(type_dic)</code></pre>
+<pre><code class="language-text" data-lang="text"><span>{'full-time': 'Full-Time', 'full time': 'Full-Time',
+'part-time': 'Part-Time', 'part time': 'Part-Time',
+'contract': 'Contract', 'contractor': 'Contract'}</span></code></pre></li>
 <li><p><i>Required Skills</i> <br />
 <span>It is also referred to <a href= "https://jessesw.com/Data-Science-Skills/">Web Scraping Indeed for Key Data Science Job Skills</a>.</span></p>
 <pre class="python"><code>##### Skills #####
@@ -277,8 +273,7 @@ The reason for the <code>try:</code> and <code>except:</code> in the for loop is
         list_text.append(&#39;Forbidden&#39;)
     #print(i) # for tracking purpose</code></pre></li>
 <li><p><span>Add all features to the original datafame and update the <code>.csv</code> files.</span></p>
-<pre><code>```python
-# Add new columns
+<pre class="python"><code># Add new columns
 job_df_careerbuilder[&#39;job_type&#39;] = list_type
 job_df_careerbuilder[&#39;job_skills&#39;] = list_skill
 job_df_careerbuilder[&#39;job_edu&#39;] = list_edu
@@ -296,10 +291,9 @@ print(job_df_careerbuilder.shape)
 
 # save the dataframe as a csv file
 # path = &#39;/path/output/&#39; + &#39;job_careerbuilder_&#39; + now_str_name + &#39;.csv&#39;
-job_df_careerbuilder.to_csv(path)
-```
-&lt;span&gt;`(26, 13)`&lt;/span&gt;</code></pre>
-<p><br /><br />
+job_df_careerbuilder.to_csv(path)</code></pre>
+<p><span><code>(26, 13)</code></span>
+<br /><br />
 <a href="/posts/2017-06-14-web-scraping-2/web_jobs3.png">
 <img src="/posts/2017-06-14-web-scraping-2/web_jobs3.png" style="width:100%"/></a><br /></p></li>
 </ul></li>

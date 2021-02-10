@@ -12,7 +12,6 @@ tags:
 draft: no
 ---
 
-<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
 
 
 <p><font color="darkred">
@@ -47,19 +46,16 @@ Take this project as an example, <code>scrape_pack</code> is the name of my pack
 <li><p>Execute parallel computing in the <code>call_packages.py</code> file.</p>
 <ul>
 <li><p>Assign the directory to the place I store the package folder.</p>
-<pre><code>``` python
-################################
+<pre><code>################################
 ##### Assign the directory #####
 ################################
 import os
 
 path = &#39;/path/webscraping_example&#39;
 os.chdir(path) # change the directory to the assigned path
-# print(os.getcwd()) # print out the current directory
-```</code></pre></li>
+# print(os.getcwd()) # print out the current directory</code></pre></li>
 <li><p>Import libraries and the customized package, <code>scrape_pack</code>.</p>
-<pre><code>```python
-#######################################################
+<pre class="python"><code>#######################################################
 ##### Import libraries and the customized package #####
 #######################################################
 import pandas
@@ -67,11 +63,9 @@ import numpy
 import datetime
 import multiprocessing as mp
 import scrape_pack.one_url
-import scrape_pack.multi_url
-```</code></pre></li>
+import scrape_pack.multi_url</code></pre></li>
 <li><p>Set the arguments for scraping the job searching websites.</p>
-<pre><code>```python
-#############################
+<pre class="python"><code>#############################
 ##### Setting Arguments #####
 #############################
 input_job = &quot;Data Scientist&quot;
@@ -91,12 +85,10 @@ BASE_URL_careerbuilder = &#39;http://www.careerbuilder.com&#39;
 
 # this is for the name of the .csv file
 now = datetime.datetime.now()
-now_str_name = now.strftime(&quot;%m%d%Y&quot;)
-```</code></pre></li>
+now_str_name = now.strftime(&quot;%m%d%Y&quot;)</code></pre></li>
 <li><p>Scrape out all the jobs’ URL from the four job searching websites using the functions in the customized package. And, save all into one data frame.<br />
 <span>More details about how to do: <a href="/posts/web-scraping-1/">How Web Scraping eases my job searching pain? - Part I : Scrape contents from one URL</a></span></p>
-<pre><code>```python
-###############################
+<pre class="python"><code>###############################
 ##### Scrape from one url #####
 ###############################
 job_df_indeed = scrape_pack.one_url.basic_indeed(BASE_URL_indeed, input_job, input_city, input_state, input_quote, sign_indeed)
@@ -114,12 +106,10 @@ job_df_all = [job_df_indeed, job_df_monster, job_df_dice, job_df_careerbuilder]
 df = pandas.concat(job_df_all)
 df.columns = [&#39;from&#39;,&#39;date&#39;,&#39;job_id&#39;,&#39;job_title&#39;,&#39;job_company&#39;,&#39;job_location&#39;,&#39;job_link&#39;]
 df.drop_duplicates([&#39;job_title&#39;, &#39;job_company&#39;], keep=&#39;first&#39;) # delete duplicates
-# print(df.shape)
-```</code></pre></li>
+# print(df.shape)</code></pre></li>
 <li><p>Parallelly scrape all the URLs in the created data frame. Then, save all the results into one <code>.csv</code> file. <br />
 <span>More details about how to do:<a href="/posts/web-scraping-2/">How Web Scraping eases my job searching pain? - Part II : Scrape contents from a list of URLs</a></span></p>
-<pre><code>```python
-######################################
+<pre class="python"><code>######################################
 ##### Scrape from a list of URLs #####
 ######################################
 lks = df[&#39;job_link&#39;]
@@ -147,8 +137,7 @@ df[&#39;job_major&#39;] = job_major
 df[&#39;job_keywords&#39;] = job_keywords
 
 # save the dataframe
-df.to_csv(path + &#39;/output/&#39;+ &#39;job_all_&#39; + now_str_name + &#39;.csv&#39;)
-```</code></pre></li>
+df.to_csv(path + &#39;/output/&#39;+ &#39;job_all_&#39; + now_str_name + &#39;.csv&#39;)</code></pre></li>
 </ul></li>
 <li><p>FINALLY, ALL DONE!</p></li>
 </ol></li>

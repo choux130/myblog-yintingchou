@@ -46,13 +46,13 @@ It is time to practice T-SQL but how can I do that with my Macbook Pro? Thanks t
         MOVE 'WWI_InMemory_Data_1' TO '/var/opt/mssql/data/WideWorldImporters_InMemory_Data_1'
         GO
         ```
-     <a href="/post/2019-04-07-running-sql-server-on-Mac-using-docker/AzureDataStudio_1.png"><img src="/post/2019-04-07-running-sql-server-on-Mac-using-docker/AzureDataStudio_1.png" class="center" style="width:700px"></a>
+     <a href="/posts/2019-04-07-running-sql-server-on-mac-using-docker/AzureDataStudio_1.png"><img src="/posts/2019-04-07-running-sql-server-on-mac-using-docker/AzureDataStudio_1.png" class="center" style="width:700px"></a>
     
     4. Then, It works! If we want to see the files in the container, we can install [Kitematic](https://kitematic.com/) to talk to the container with command. 
     
-        <a href="/post/2019-04-07-running-sql-server-on-Mac-using-docker/AzureDataStudio_2.png"><img src="/post/2019-04-07-running-sql-server-on-Mac-using-docker/AzureDataStudio_2.png" class="center" style="width:700px"></a>
+        <a href="/posts/2019-04-07-running-sql-server-on-mac-using-docker/AzureDataStudio_2.png"><img src="/posts/2019-04-07-running-sql-server-on-mac-using-docker/AzureDataStudio_2.png" class="center" style="width:700px"></a>
 
-        <a href="/post/2019-04-07-running-sql-server-on-Mac-using-docker/Kitematic.png"><img src="/post/2019-04-07-running-sql-server-on-Mac-using-docker/Kitematic.png" style="width:700px" class="center"></a>
+        <a href="/posts/2019-04-07-running-sql-server-on-mac-using-docker/Kitematic.png"><img src="/posts/2019-04-07-running-sql-server-on-mac-using-docker/Kitematic.png" style="width:700px" class="center"></a>
     
     
     
