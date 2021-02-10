@@ -16,6 +16,7 @@ outputs:
   section:
     - JSON
     - HTML
+googleAnalytics: "UA-90830701-1"
 disqusshortname: "yintingchou-com"
 params:
   favicon: favicon.ico
