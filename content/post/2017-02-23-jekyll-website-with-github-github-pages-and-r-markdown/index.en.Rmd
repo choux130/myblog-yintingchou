@@ -19,7 +19,7 @@ Yihui Xie has announced a new package [blogdown](https://blog.rstudio.com/2017/0
 <br />
 <hr />
 
-**The Github repository for this website :** [choux130/myblog](https://github.com/choux130/myblog). <br />
+**The Github repository for this website :** [choux130/myblog](https://github.com/choux130/myblog-jekyll). <br />
 **The Github repository for the website template :** [bencentra/centrarium](https://github.com/bencentra/centrarium)
 
 This post is about the process I have benn through for setting up this website, the resources I have read and the things I have tried to do and it just worked out. If you are also new to website setup but has passions for having one, please check out this post and hope you find it helpful to you. Feel free to leave any comments. Let's discuss and learn together! 
