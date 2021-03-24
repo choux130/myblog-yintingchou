@@ -22,16 +22,15 @@
         <em class="fa fa-angle-up"></em>
       </button>
     {{ end }}
-    <script src="https://utteranc.es/client.js"
+    {{ if  (not (isset .Params "disable_comments")) }}
+      <script src="https://utteranc.es/client.js"
         repo="choux130/myblog-yintingchou"
         issue-term="title"
         label="comments 💬"
         theme="github-light"
         crossorigin="anonymous"
         async>
-    </script>
-    {{ if  (not (isset .Params "disable_comments")) }}
-      {{ partial "disqus.html" . }}
+      </script>
     {{ end }}
   </div>
 {{ end }}
