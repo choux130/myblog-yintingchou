@@ -1,0 +1,47 @@
+---
+title: Git Commands
+author: Yin-Ting Chou
+date: '2021-03-23'
+slug: git-commands
+categories:
+  - Others
+tags:
+  - Git
+backtotop: no
+toc: no
+---
+These are the Git commands that I used a lot in my job. 
+
+* Stash all the files including untracked new files.
+  ```{bash eval=FALSE, include=TRUE}
+  git stash save -u "stash_name"
+  ```
+
+* Undo merge or rebase.
+  ```{bash eval=FALSE, include=TRUE}
+  git merge --abort
+  git rebase --abort
+  ```
+* Remove all the files which are not in git (untracked new files).
+  ```{bash eval=FALSE, include=TRUE}
+  git clean -xfd
+  ```
+* Discard all the local changes.
+  ```{bash eval=FALSE, include=TRUE}
+  git checkout -f
+  ```
+* Reset to previous steps like undo the commit. 
+  ```{bash eval=FALSE, include=TRUE}
+  git reflog
+  git reset --hard <hash-or-ref>
+  ```
+* Undo pushed commits.
+  ```{bash eval=FALSE, include=TRUE}
+  git log
+  git reset --hard <commit_hash>
+  git push -f origin <branch-name>
+  ```
+
+And, this is [gitexplorer](https://gitexplorer.com/) which provides you a clean and nice way to search the commands you want. Thanks to the recommendation from one of my colleagues.
+
+<iframe id="inlineFrameExample" width="750" height="750" src="https://gitexplorer.com/" frameborder="0" allowfullscreen="allowfullscreen"></iframe>

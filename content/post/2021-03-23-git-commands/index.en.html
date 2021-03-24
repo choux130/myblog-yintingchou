@@ -1,0 +1,41 @@
+---
+title: Git Commands
+author: Yin-Ting Chou
+date: '2021-03-23'
+slug: git-commands
+categories:
+  - Others
+tags:
+  - Git
+backtotop: no
+toc: no
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+<div id="TOC">
+
+</div>
+
+<p>These are the Git commands that I used a lot in my job.</p>
+<ul>
+<li><p>Stash all the files including untracked new files.</p>
+<pre class="bash"><code>git stash save -u &quot;stash_name&quot;</code></pre></li>
+<li><p>Undo merge or rebase.</p>
+<pre class="bash"><code>git merge --abort
+git rebase --abort</code></pre></li>
+<li><p>Remove all the files which are not in git (untracked new files).</p>
+<pre class="bash"><code>git clean -xfd</code></pre></li>
+<li><p>Discard all the local changes.</p>
+<pre class="bash"><code>git checkout -f</code></pre></li>
+<li><p>Reset to previous steps like undo the commit.</p>
+<pre class="bash"><code>git reflog
+git reset --hard &lt;hash-or-ref&gt;</code></pre></li>
+<li><p>Undo pushed commits.</p>
+<pre class="bash"><code>git log
+git reset --hard &lt;commit_hash&gt;
+git push -f origin &lt;branch-name&gt;</code></pre></li>
+</ul>
+<p>And, this is <a href="https://gitexplorer.com/">gitexplorer</a> which provides you a clean and nice way to search the commands you want. Thanks to the recommendation from one of my colleagues.</p>
+<iframe id="inlineFrameExample" width="750" height="750" src="https://gitexplorer.com/" frameborder="0" allowfullscreen="allowfullscreen">
+</iframe>
