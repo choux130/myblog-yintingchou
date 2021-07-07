@@ -1,0 +1,35 @@
+---
+title: Combine R Shiny and Dash using Docker Compose
+author: Yin-Ting Chou
+date: '2021-07-07'
+slug: combine-r-shiny-and-dash-using-docker-compose
+categories: 
+  - Docker Compose
+  - R Shiny
+  - Dash
+tags: 
+  - Docker Compose
+  - R Shiny
+  - Dash
+backtotop: no
+toc: no
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+<div id="TOC">
+
+</div>
+
+<div id="the-problem-i-faced" class="section level1">
+<h1>The problem I faced</h1>
+<p>I am a R user who love using <a href="https://shiny.rstudio.com/">R Shiny</a> to do any interactive visual related projects. My colleague who is more familiar with Python love to use <a href="https://dash.plotly.com/">Dash</a> to do his dashboard tasks. One day, our manager asked us if we two could work together to create an internal dashboard. We looked at each other and started thinking which path is easier, have me learn Dash from the beginning or have him learn R Shiny from the beginning? Or, any better solution?</p>
+</div>
+<div id="solution" class="section level1">
+<h1>Solution</h1>
+<p>After multiple discussions and testing, this is our solution. Use <a href="https://docs.docker.com/compose/">Docker Compose</a> to combine the two apps, and add <a href="https://www.nginx.com/">Nginx</a> to redirect all the traffics to the right places. To make people think they are looking at the same app, we created a menu bar in both R Shiny and Dash app and make sure they all have the same style. The following GIF shows you how to reproduce this in your local machine and how the output looks like. For the source code, check out the <code>Rshiny_Dash</code> folder in my Github repo, <a href="https://github.com/choux130/RshinyExamples/tree/main/Rshiny_Dash">choux130/RshinyExamples</a>.</p>
+<div class="figure">
+<img src="https://drive.google.com/uc?export=view&amp;id=1mRj-gJc9QRKQWr2TDm05GAo8c23V-46k" style="width:100.0%" alt="" />
+<p class="caption">intro</p>
+</div>
+</div>
