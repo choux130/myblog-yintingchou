@@ -21,6 +21,6 @@ I am a R user who love using [R Shiny](https://shiny.rstudio.com/) to do any int
 # Solution
 After multiple discussions and testing, this is our solution. Use [Docker Compose](https://docs.docker.com/compose/) to combine the two apps, and add [Nginx](https://www.nginx.com/) to redirect all the traffics to the right places. To make people think they are looking at the same app, we created a menu bar in both R Shiny and Dash app and make sure they all have the same style. The following GIF shows you how to reproduce this in your local machine and how the output looks like. For the source code, check out the `Rshiny_Dash` folder in my Github repo, [choux130/RshinyExamples](https://github.com/choux130/RshinyExamples/tree/main/Rshiny_Dash). 
 
-![intro](https://drive.google.com/uc?export=view&id=1mRj-gJc9QRKQWr2TDm05GAo8c23V-46k){width=100%}
+![](https://drive.google.com/uc?export=view&id=1mRj-gJc9QRKQWr2TDm05GAo8c23V-46k){width=100%}
 
 
