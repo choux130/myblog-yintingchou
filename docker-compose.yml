@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  hugo:
+    image: klakegg/hugo:0.107.0-ubuntu-onbuild
+    ports:
+      - 1313:1313
+    entrypoint: hugo serve 
+    # entrypoint: sleep infinity
+    # volumes:
+    #   - .:/src
+    
+
+    

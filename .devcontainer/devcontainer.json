@@ -1,0 +1,24 @@
+{
+	"name": "Existing Docker Compose (Extend)",
+
+	"dockerComposeFile": [
+		"../docker-compose.yml",
+		"docker-compose-dev-in-container.yml"
+	],
+
+	"service": "hugo",
+
+	"workspaceFolder": "/workspace",
+
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {},
+			"extensions": []
+		}
+	},
+
+	"postCreateCommand": "apt update; apt install -y git; hugo serve"
+
+}
