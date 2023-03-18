@@ -1,6 +1,6 @@
 ---
 button: About
-title: Yin-Ting Chou
+title: Yin-Ting (Ting) Chou
 weight: 2
 disable_comments: true
 ---
