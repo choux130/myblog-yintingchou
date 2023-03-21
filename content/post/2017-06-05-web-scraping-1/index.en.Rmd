@@ -7,9 +7,8 @@ slug: web-scraping-1
 aliases: 
   - /posts/web-scraping-1
 categories:
-  - Others
+  - Web Scraping
 tags:
-  - Website
 draft: no
 ---
 

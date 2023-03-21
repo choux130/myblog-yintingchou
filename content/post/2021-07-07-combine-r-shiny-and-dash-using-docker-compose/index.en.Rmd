@@ -4,12 +4,11 @@ author: Yin-Ting Chou
 date: '2021-07-07'
 slug: combine-r-shiny-and-dash-using-docker-compose
 categories: 
-  - Docker Compose
-  - R Shiny
-  - Dash
+  - Docker
+  - R
+  - Python
 tags: 
-  - Docker Compose
-  - R Shiny
+  - Rshiny
   - Dash
 backtotop: no
 toc: no

@@ -6,9 +6,8 @@ slug: web-scraping-3
 aliases: 
   - /posts/web-scraping-3
 categories:
-  - Others
+  - Web Scraping
 tags:
-  - Website
 draft: no
 ---
 <font color="darkred">

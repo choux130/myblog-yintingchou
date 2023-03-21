@@ -51,3 +51,7 @@ params:
     - icon: fab fa-github
       name: github
       url: https://github.com/choux130
+markup:
+  goldmark:
+    renderer:
+      unsafe: true

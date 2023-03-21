@@ -4,9 +4,8 @@ author: R package build
 date: '2021-04-20'
 slug: the-benefits-of-using-version-control
 categories:
-  - Others
-tags:
   - Git
+tags:
 backtotop: no
 toc: no
 ---

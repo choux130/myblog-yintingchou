@@ -6,7 +6,7 @@ slug: naive-bayes-classifier
 aliases: 
   - /posts/naive-bayes-classifier
 categories:
-  - Methodology
+  - Data Science
 tags:
   - Classification
 draft: no

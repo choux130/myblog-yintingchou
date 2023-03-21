@@ -6,7 +6,7 @@ slug: state-space-model-for-exponential-smoothing
 aliases: 
   - /posts/state-space-model-for-exponential-smoothing/
 categories:
-  - Methodology
+  - Data Science
 tags:
   - Time Series Analysis
 ---

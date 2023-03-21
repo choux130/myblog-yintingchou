@@ -6,11 +6,10 @@ slug: docker-sql-server
 aliases: 
   - /posts/docker-sql-server
 categories:
-  - Others
-tags:
-  - SQL Server
   - Docker
-  - Azure Data Studio
+  - Data Engineering
+tags:
+  - MSSQLSERVER
 draft: no
 ---
 
