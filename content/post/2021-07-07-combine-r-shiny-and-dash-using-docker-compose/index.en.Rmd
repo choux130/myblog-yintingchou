@@ -4,9 +4,9 @@ author: Yin-Ting Chou
 date: '2021-07-07'
 slug: combine-r-shiny-and-dash-using-docker-compose
 categories: 
-  - Docker
   - R
   - Python
+  - Docker
 tags: 
   - Rshiny
   - Dash

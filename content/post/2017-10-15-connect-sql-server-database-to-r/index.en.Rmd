@@ -7,6 +7,7 @@ aliases:
   - /posts/connect-sql-server-database-to-r
 categories:
   - R
+  - SQL
   - Data Engineering
 tags:
   - MSSQLSERVER

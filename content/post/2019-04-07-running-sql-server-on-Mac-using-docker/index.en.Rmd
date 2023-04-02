@@ -6,6 +6,7 @@ slug: docker-sql-server
 aliases: 
   - /posts/docker-sql-server
 categories:
+  - SQL
   - Docker
   - Data Engineering
 tags:

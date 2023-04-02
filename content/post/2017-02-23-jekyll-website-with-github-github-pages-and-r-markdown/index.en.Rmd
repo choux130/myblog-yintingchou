@@ -6,8 +6,11 @@ slug: jekyll-website-with-github-github-pages-and-r-markdown
 aliases: 
   - /posts/jekyll-website-with-github-github-pages-and-r-markdown
 categories:
+  - R
   - Web Development
 tags: 
+  - Jekyll
+  - Github
 draft: no
 ---
 
