@@ -106,7 +106,7 @@ a {
 .intro-header [class$="-heading"] h1 {
   margin-top: 0;
   padding-top: 0;
-  font-size: 35px;
+  font-size: 40px;
 }
 
 h1,h2,h3,h4,h5,h6 {
@@ -121,6 +121,10 @@ h1,h2,h3,h4,h5,h6 {
   font-size: 16px;
   line-height: 1.7;
   color: #333333;
+}
+
+.container img {
+  max-width: 100%;
 }
 
 #blog-archives {
@@ -345,6 +349,9 @@ code {
   border-radius: 10px;
   font-size: 16px;
   text-align: center;
+  transition: 0.5s;
+  opacity: 0;
+  display: none;
 }
 
 #backtotopButton:hover {
@@ -411,6 +418,30 @@ mark {
   background-color: #eeff00;
 }
 
+.bottomnav {
+  list-style: none;
+  text-align: center;
+  padding-left: 0;
+}
+
+.bottomnav ul {
+  display: block;
+}
+
+.bottomnav li {
+  display: inline;
+}
+
+.bottomnav .previous > a  {
+  float: left;
+  display: block;
+}
+
+.bottomnav .next > a {
+  float: right;
+  display: block;
+}
+
 .pager {
   list-style: none;
   text-align: center;
@@ -465,9 +496,21 @@ footer {
   font-family: 'Roboto', Helvetica, sans-serif;
 }
 
+footer .social-icons a {
+  width: 1em;
+  height: 1em;
+}
+
+footer .social-icons a img {
+  width: 1em;
+  height: 1em;
+  vertical-align: top;
+}
+
 footer .copyright {
   font-family: 'Roboto', Helvetica, sans-serif;
   text-align: center;
+  margin-top: 10px;
   margin-bottom: 0;
 }
 

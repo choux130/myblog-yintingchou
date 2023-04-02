@@ -3,9 +3,11 @@
 
   {{ if .IsTranslated }}
     <p>
-    {{ range .Translations }}
-      <a href="{{ .Permalink }}" name="{{ .Language.LanguageName }}">{{ .Language.LanguageName }}</a>
-    {{ end }}
+      {{ range .Translations }}
+        <a href="{{ .Permalink }}" name="{{ .Language.LanguageName }}"
+          >{{ .Language.LanguageName }}</a
+        >
+      {{ end }}
     </p>
   {{ end }}
   <div class="container">
@@ -22,7 +24,7 @@
     </p>
 
     <p class="credits theme-by">
-      {{ i18n "powered-by" }} <a href="https://gohugo.io">Hugo</a> & <a href="https://github.com/rstudio/blogdown">blogdown</a>&nbsp;
+      {{ i18n "powered-by" }} <a href="https://gohugo.io">Hugo</a>&nbsp;
       {{ i18n "theme" }}
       <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
     </p>
