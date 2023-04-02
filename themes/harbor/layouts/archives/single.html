@@ -8,6 +8,22 @@
     <div class="container" id="main">
       <article role="article" id="blog-archives">
         <table class="archives">
+          <!-- <tbody>
+            {{ range (where (where .Site.Pages ".Section" "post") "Kind" "page") }}
+              <tr>
+                <td>
+                  {{ .Date | dateFormat "2006" }}&nbsp;{{ .Date | dateFormat "Jan" }}&nbsp;{{ .Date | dateFormat "2" }}
+                </td>
+                <td>
+                  <p>
+                    <a href="{{ .Permalink }}" title="{{ .Title }}"
+                      >{{ .Title }}</a
+                    >
+                  </p>
+                </td>
+              </tr>
+            {{ end }}
+          </tbody> -->
           {{ $updated_year := .Site.LastChange.Format "2006" }}
           {{ range (where (where .Site.Pages ".Section" "post") "Kind" "page").GroupByDate "2006" -}}
             <tbody>
