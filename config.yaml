@@ -27,6 +27,11 @@ params:
   mainSections: post
   math: true
   nav:
+    - icon: fas fa-solid fa-book fa-lg
+      identifier: notion
+      name: Notion
+      weight: 3
+      url: /notion/
     - icon: fas fa-user fa-lg
       identifier: about
       name: About
