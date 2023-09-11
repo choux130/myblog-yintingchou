@@ -21,7 +21,7 @@ Few days ago, I asked myself a question about how can you better manage all the 
 
 This is the architecture overview, 
 <p align="center">
-<img src="https://raw.githubusercontent.com/choux130/DevOps_In_DE/main/jenkins_mysql_flyway/jenkins_mysql_flyway.png" width="600" title="architecture_diagram">
+<img src="https://github.com/choux130/DevOps_In_DE/blob/main/DBChanges_Flyway/img/jenkins_mysql_flyway.png?raw=true" width="600" title="architecture_diagram">
 </p>
 
 <br/>
