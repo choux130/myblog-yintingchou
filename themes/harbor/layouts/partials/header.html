@@ -21,6 +21,11 @@
             <h1>
               {{ with $title }}{{ . }}{{ else }}<br />{{ end }}
             </h1>
+            {{ if .IsHome }}
+            <font color="#8B0000"><b>
+            For more recent posts please click <a href="/notion">here</a> or the book icon on the top, <a href="/notion"><em class="fas fa-solid fa-book fa-lg"></em></a>.     
+            </b></font>
+            {{ end }}
           {{ end }}
           {{ if eq .Type "post" }}
             {{ partial "postmeta.html" . }}

@@ -27,16 +27,16 @@ params:
   mainSections: post
   math: true
   nav:
-    - icon: fas fa-solid fa-book fa-lg
-      identifier: notion
-      name: Notion
-      weight: 3
-      url: /notion/
     - icon: fas fa-user fa-lg
       identifier: about
       name: About
       url: /about/
       weight: 3
+    - icon: fas fa-solid fa-book fa-lg
+      identifier: notion
+      name: Notion
+      weight: 3
+      url: /notion/
     - icon: fas fa-folder-open fa-lg
       identifier: categories
       name: Category
