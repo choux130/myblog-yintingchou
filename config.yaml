@@ -1,7 +1,7 @@
 baseURL: https://yintingchou.com/
 title: My Blog
 author: Yin-Ting Chou
-paginate: 3
+paginate: 6
 languageCode: en
 DefaultContentLanguage: en
 enableInlineShortcodes: yes
@@ -32,11 +32,11 @@ params:
       name: About
       url: /about/
       weight: 3
-    - icon: fas fa-solid fa-book fa-lg
-      identifier: notion
-      name: Notion
-      weight: 3
-      url: /notion/
+    # - icon: fas fa-solid fa-book fa-lg
+    #   identifier: notion
+    #   name: Notion
+    #   weight: 3
+    #   url: /notion/
     - icon: fas fa-folder-open fa-lg
       identifier: categories
       name: Category
