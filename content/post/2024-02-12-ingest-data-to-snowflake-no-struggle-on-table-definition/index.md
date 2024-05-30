@@ -13,20 +13,22 @@ draft: no
 ---
 One thing I learned from my work is that even though having proper table definition is good for the data standardization, sometimes we just want to have the data be ingested to Snowflake without worrying about if all the column types are 100% correct or not. 
 
-The following is the code I use for this case which can help me easily ingest data into snowflake with only 3 required parameters, `SOURCE_NAME`, `TARGET_NAME`, and `FILE_FORMAT`.
+The following is the code I use for this case which can help me easily ingest data into snowflake with only 4 main required parameters, `SOURCE_NAME`, `TARGET_NAME`, `FILE_FORMAT`, and `ALL_COLUMN_TYPE_AS_STRING`. Sometimes, when the dataset is large, it can be time consuming on infering schema. If we just want to create a table from the dataset and do not care about the column type, then we can set `ALL_COLUMN_TYPE_AS_STRING` as TRUE. 
 
 ```sql
-SET source_name = '@my_database.public.my_s3_stage/dynamic_ingest/';
-SET target_name = 'MY_DATABASE.DATA_LAKE_INGEST.MY_TABLE';
-SET file_format = 'MY_DATABASE.DATA_LAKE_INGEST.MY_FF';
+SET source_name = '@ODS.INGEST.my_s3_stage/out.csv';
+SET target_name = 'ODS.INGEST.MY_TABLE';
+SET file_format = 'ODS.INGEST.MY_FF';
+SET all_column_type_as_string = TRUE;
 CREATE OR REPLACE FILE FORMAT IDENTIFIER($file_format) TYPE='CSV' FIELD_DELIMITER=',' SKIP_HEADER=1;
 
-CALL MY_DATABASE.DATA_LAKE_INGEST.CREATE_TABLE_WITH_INFER_SCHEMA (
+CALL ADM.SHARED.CREATE_TABLE_WITH_INFER_SCHEMA (
     $source_name, 
     $target_name, 
     $file_format, 
+    $all_column_type_as_string,
     NULL);
-CALL MY_DATABASE.DATA_LAKE_INGEST.INGEST_DATA_USING_COPY_INTO (
+CALL ADM.SHARED.INGEST_DATA_USING_COPY_INTO (
     $source_name, 
     $target_name, 
     $file_format, 
@@ -41,12 +43,13 @@ SELECT * FROM IDENTIFIER($target_name);
 SET metadata_column_definition = 'ADD IF NOT EXISTS DL_RECORD_ID INT, IF NOT EXISTS FILE_NAME STRING, IF NOT EXISTS INS_TS TIMESTAMP_LTZ'; 
 SET metadata_column_values = 'METADATA$FILE_ROW_NUMBER, METADATA$FILENAME, METADATA$START_SCAN_TIME';
 
-CALL MY_DATABASE.DATA_LAKE_INGEST.CREATE_TABLE_WITH_INFER_SCHEMA (
+CALL ADM.SHARED.CREATE_TABLE_WITH_INFER_SCHEMA (
     $source_name, 
     $target_name, 
     $file_format, 
+    $all_column_type_as_string,
     $metadata_column_definition);
-CALL MY_DATABASE.DATA_LAKE_INGEST.INGEST_DATA_USING_COPY_INTO (
+CALL ADM.SHARED.INGEST_DATA_USING_COPY_INTO (
     $source_name, 
     $target_name, 
     $file_format, 
@@ -58,10 +61,11 @@ SELECT * FROM IDENTIFIER($target_name);
 <img src="./imgs/meta_columns.png" alt="meta_columns"/>
 
 ```sql
-CREATE OR REPLACE PROCEDURE MY_DATABASE.DATA_LAKE_INGEST.CREATE_TABLE_WITH_INFER_SCHEMA (
+CREATE OR REPLACE PROCEDURE ADM.SHARED.CREATE_TABLE_WITH_INFER_SCHEMA (
     SOURCE_NAME STRING,
     TARGET_NAME STRING,
     FILE_FORMAT STRING,
+    ALL_COLUMN_TYPE_AS_STRING BOOLEAN, -- FALSE, use infer schema to figure out the correct type, otherwise, all columns' type is STRING
     METADATA_COLUMN_DEFINITION STRING) -- NULL, if no columns needed to be added 
 RETURNS TABLE()
 LANGUAGE SQL
@@ -84,20 +88,42 @@ BEGIN
     RES := (EXECUTE IMMEDIATE :SQL_CREATE_FF_INFER);
     RES := (EXECUTE IMMEDIATE :SQL_ALTER_FF_INFER);
 
-    SELECT SQL_STATEMENT INTO :SQL_STATEMENT_CREATE_TABLE FROM (
-        SELECT CONCAT(CREATE_TBL_BEGIN,COL_LIST,');') AS SQL_STATEMENT
-                FROM (
-                        SELECT
-                            CONCAT('CREATE OR REPLACE TABLE ',:TARGET_NAME,' (') AS CREATE_TBL_BEGIN
-                            ,UPPER(REPLACE(GENERATE_COLUMN_DESCRIPTION(ARRAY_AGG(OBJECT_CONSTRUCT(*)), 'table'),'"','')) AS COL_LIST
-                        FROM TABLE(
-                            INFER_SCHEMA(
-                                LOCATION=> :SOURCE_NAME,
-                                FILE_FORMAT  => :FILE_FORMAT_INFER
+    IF (ALL_COLUMN_TYPE_AS_STRING) THEN
+        SELECT SQL_STATEMENT INTO :SQL_STATEMENT_CREATE_TABLE FROM (
+            SELECT CONCAT(CREATE_TBL_BEGIN,COL_LIST,');') AS SQL_STATEMENT
+                    FROM (
+                            SELECT
+                                CONCAT('CREATE OR REPLACE TABLE ',:TARGET_NAME,' (') AS CREATE_TBL_BEGIN
+                                ,UPPER(REPLACE(GENERATE_COLUMN_DESCRIPTION(ARRAY_AGG(OBJECT_CONSTRUCT(*)), 'table'),'"','')) AS COL_LIST
+                            FROM (
+                                SELECT COLUMN_NAME,'STRING' AS TYPE
+                                FROM TABLE(
+                                    INFER_SCHEMA(
+                                        LOCATION=> :SOURCE_NAME,
+                                        FILE_FORMAT  => :FILE_FORMAT_INFER,
+                                        MAX_RECORDS_PER_FILE => 1
+                                    )
+                                ) 
                             )
-                        ) 
-                )
-    );
+                    )
+        );
+    ELSE 
+        SELECT SQL_STATEMENT INTO :SQL_STATEMENT_CREATE_TABLE FROM (
+            SELECT CONCAT(CREATE_TBL_BEGIN,COL_LIST,');') AS SQL_STATEMENT
+                    FROM (
+                            SELECT
+                                CONCAT('CREATE OR REPLACE TABLE ',:TARGET_NAME,' (') AS CREATE_TBL_BEGIN
+                                ,UPPER(REPLACE(GENERATE_COLUMN_DESCRIPTION(ARRAY_AGG(OBJECT_CONSTRUCT(*)), 'table'),'"','')) AS COL_LIST
+                            FROM TABLE(
+                                INFER_SCHEMA(
+                                    LOCATION => :SOURCE_NAME,
+                                    FILE_FORMAT => :FILE_FORMAT_INFER
+                                )
+                            ) 
+                    )
+        );
+    END IF;
+        
     RES := (EXECUTE IMMEDIATE :SQL_STATEMENT_CREATE_TABLE);
     RES := (EXECUTE IMMEDIATE :SQL_DROP_FF_INFER);
 
@@ -110,7 +136,7 @@ BEGIN
     RETURN TABLE(RES);
 END;
 
-CREATE OR REPLACE PROCEDURE MY_DATABASE.DATA_LAKE_INGEST.INGEST_DATA_USING_COPY_INTO (
+CREATE OR REPLACE PROCEDURE ADM.SHARED.INGEST_DATA_USING_COPY_INTO (
     SOURCE_NAME STRING,     
     TARGET_NAME STRING, 
     FILE_FORMAT STRING, 
