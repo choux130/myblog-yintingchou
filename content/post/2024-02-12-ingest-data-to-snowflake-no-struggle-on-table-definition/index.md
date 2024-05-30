@@ -1,5 +1,5 @@
 ---
-title: 'Easily Ingest Data To Snowflake Without Struggling Table Definition At The Beginning'
+title: 'Easily Ingest Data To Snowflake Without Struggling Table Definition'
 author: Yin-Ting
 date: '2024-02-13'
 slug: ingest-data-to-snowflake-no-struggle-on-table-definition
