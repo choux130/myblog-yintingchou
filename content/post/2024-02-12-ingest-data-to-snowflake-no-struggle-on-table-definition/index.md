@@ -13,13 +13,14 @@ draft: no
 ---
 One thing I learned from my work is that even though having proper table definition is good for the data standardization, sometimes we just want to have the data be ingested to Snowflake without worrying about if all the column types are 100% correct or not. 
 
-The following is the code I use for this case which can help me easily ingest data into snowflake with only 4 main required parameters, `SOURCE_NAME`, `TARGET_NAME`, `FILE_FORMAT`, and `ALL_COLUMN_TYPE_AS_STRING`. Sometimes, when the dataset is large, it can be time consuming on infering schema. If we just want to create a table from the dataset and do not care about the column type, then we can set `ALL_COLUMN_TYPE_AS_STRING` as TRUE. 
+The following is the code I use for this case which can help me easily ingest data into snowflake with only 4 main required parameters, `SOURCE_NAME`, `TARGET_NAME`, `FILE_FORMAT`, and `ALL_COLUMN_TYPE_AS_STRING`. Sometimes, when the dataset is large, it can be time consuming on infering schema. If we just want to create a table from the dataset and do not care about the column type, then we can set `ALL_COLUMN_TYPE_AS_STRING` as TRUE. And, if we do not want to load all data and want to limit by size, then we can set `SIZE_LIMIT` as not null. 
 
 ```sql
 SET source_name = '@ODS.INGEST.my_s3_stage/out.csv';
 SET target_name = 'ODS.INGEST.MY_TABLE';
 SET file_format = 'ODS.INGEST.MY_FF';
-SET all_column_type_as_string = TRUE;
+SET all_column_type_as_string = FALSE;
+SET size_limit = NULL;
 CREATE OR REPLACE FILE FORMAT IDENTIFIER($file_format) TYPE='CSV' FIELD_DELIMITER=',' SKIP_HEADER=1;
 
 CALL ADM.SHARED.CREATE_TABLE_WITH_INFER_SCHEMA (
@@ -32,12 +33,14 @@ CALL ADM.SHARED.INGEST_DATA_USING_COPY_INTO (
     $source_name, 
     $target_name, 
     $file_format, 
+    $size_limit,
     NULL);
 
 SELECT * FROM IDENTIFIER($target_name);
 ```
 
 <img src="./imgs/no_meta_columns.png" alt="no_meta_columns"/>
+<img src="./imgs/no_meta_columns_all_string.png" alt="no_meta_columns_all_string"/>
 
 ```sql
 SET metadata_column_definition = 'ADD IF NOT EXISTS DL_RECORD_ID INT, IF NOT EXISTS FILE_NAME STRING, IF NOT EXISTS INS_TS TIMESTAMP_LTZ'; 
@@ -140,6 +143,7 @@ CREATE OR REPLACE PROCEDURE ADM.SHARED.INGEST_DATA_USING_COPY_INTO (
     SOURCE_NAME STRING,     
     TARGET_NAME STRING, 
     FILE_FORMAT STRING, 
+    SIZE_LIMIT INTEGER, -- NULL, if do not want to limit the load size
     METADATA_COLUMN_VALUES STRING) -- NULL, if no columns needed to be added 
 RETURNS TABLE()
 LANGUAGE SQL
@@ -184,6 +188,12 @@ BEGIN
     ELSE
         SQL_CP := 'COPY INTO ' || :TARGET_NAME || ' FROM ( SELECT ' || :SQL_COLUMN_POSTION_STRING || ' FROM ' || :SOURCE_NAME || '(FILE_FORMAT=> ' || :FILE_FORMAT || '))';
     END IF;    
+
+    IF (SIZE_LIMIT IS NOT NULL) THEN
+        SQL_CP := SQL_CP || ' SIZE_LIMIT = ' || :SIZE_LIMIT;
+    END IF;
+    
+
     RES := (EXECUTE IMMEDIATE :SQL_CP);
 
     RETURN TABLE(RES);
